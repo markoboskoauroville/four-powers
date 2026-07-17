@@ -156,7 +156,17 @@ main,.topbar{position:relative;z-index:1}
   font-family:var(--mono);font-size:.58rem;letter-spacing:.16em;
   text-transform:uppercase;color:var(--faint);
 }
-#context,#closing,#glossary,#sources{scroll-margin-top:1.5rem}
+#toc,#context,#closing,#glossary,#sources{scroll-margin-top:1.5rem}
+.toplink{margin:2.5rem 0 0;text-align:right}
+.aspect .toplink{width:var(--col);margin-inline:auto}
+.toplink a{
+  display:inline-flex;align-items:center;gap:.5rem;padding:.45rem 0;
+  font-family:var(--mono);font-size:.6rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--faint);text-decoration:none;
+  transition:color .2s;
+}
+.toplink a::before{content:'\2191';font-size:.9em;opacity:.75}
+.toplink a:hover{color:var(--violet)}
 
 /* ── context ─────────────────────────────── */
 .context{width:var(--col);margin:5rem auto}
@@ -342,7 +352,7 @@ main,.topbar{position:relative;z-index:1}
     <button data-lang="de" aria-current="false">DE</button>
     <button data-lang="hr" aria-current="false">HR</button>
   </nav>
-  <span class="ver">v5 (a)</span>
+  <span class="ver">v6 (a)</span>
 </header>
 
 <main>
@@ -354,7 +364,7 @@ main,.topbar{position:relative;z-index:1}
     <p class="attrs" id="h-attrs"></p>
   </section>
 
-  <nav class="toc" aria-labelledby="toc-h">
+  <nav class="toc" id="toc" aria-labelledby="toc-h">
     <p class="eyebrow" id="toc-h"></p>
     <ol class="toclist" id="toc-list"></ol>
   </nav>
@@ -363,6 +373,7 @@ main,.topbar{position:relative;z-index:1}
     <p class="eyebrow" id="c-eyebrow"></p>
     <h2 id="c-title"></h2>
     <div class="grid2 prose" id="c-body"></div>
+    <p class="toplink" data-top></p>
   </section>
 
   <div id="aspects"></div>
@@ -372,6 +383,7 @@ main,.topbar{position:relative;z-index:1}
       <p class="eyebrow" id="z-eyebrow"></p>
       <h2 id="z-title"></h2>
       <div class="prose" id="z-body"></div>
+      <p class="toplink" data-top></p>
     </div>
   </section>
 
@@ -381,6 +393,7 @@ main,.topbar{position:relative;z-index:1}
       <h2 id="g-title"></h2>
       <ul class="gterms" id="g-list"></ul>
       <p class="note" id="g-note"></p>
+      <p class="toplink" data-top></p>
     </div>
   </section>
 
@@ -1011,6 +1024,8 @@ function render(lang){
     <ul class="rem">${a.remedies.map(r=>
       `<li><b>${r.t}</b>${r.d?` <i>${r.d}</i>`:''}</li>`).join('')}</ul>
   </div>
+
+  <p class="toplink" data-top></p>
 </section>`;
   }).join('');
 
@@ -1027,6 +1042,11 @@ function render(lang){
   $('f-title').textContent = t.srcTitle;
   $('f-list').innerHTML    = t.src.map(s=>`<li>${s}</li>`).join('');
   $('f-sign').textContent  = t.sign;
+
+  // every chapter gets the same way back up, reusing the Contents label
+  document.querySelectorAll('[data-top]').forEach(e=>{
+    e.innerHTML = `<a href="#toc">${t.L.toc}</a>`;
+  });
 
   document.querySelectorAll('.langs button').forEach(b=>
     b.setAttribute('aria-current', String(b.dataset.lang===lang)));
