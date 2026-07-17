@@ -101,7 +101,18 @@ main,.topbar{position:relative;z-index:1}
   background:var(--line);margin:1.1rem auto}
 
 /* ── symbol ──────────────────────────────── */
-.symbol{margin:2.2rem auto 0;max-width:min(400px,88vw);display:block}
+.coda{
+  width:var(--col);margin:3.5rem auto 0;padding-top:3rem;
+  text-align:center;position:relative;border-top:1px solid var(--line-soft);
+}
+.coda::before{
+  content:'';position:absolute;top:1.5rem;left:50%;transform:translateX(-50%);
+  width:min(440px,92vw);height:23rem;pointer-events:none;
+  background:radial-gradient(circle at 50% 45%,rgba(167,139,250,.10),transparent 68%);
+}
+.coda > *{position:relative}
+.coda .sign{margin-top:2.2rem}
+.symbol{margin:0 auto;max-width:min(400px,88vw);display:block}
 .op{transform-origin:200px 200px}
 .ip{transform-origin:200px 200px;cursor:pointer}
 .ip path{
@@ -125,6 +136,27 @@ main,.topbar{position:relative;z-index:1}
   min-height:1.4em;margin-top:.9rem;transition:color .3s;
 }
 .hint.on{color:var(--hc)}
+
+/* ── toc ─────────────────────────────────── */
+.toc{width:var(--col);margin:4.5rem auto 0;padding-top:2.6rem;
+  border-top:1px solid var(--line-soft)}
+.toclist{list-style:none;margin-top:1.1rem}
+.toclist li{border-bottom:1px solid var(--line-soft)}
+.toclist li:first-child{border-top:1px solid var(--line-soft)}
+.toclist a{
+  display:flex;align-items:baseline;gap:1rem;
+  padding:.75rem .1rem;text-decoration:none;color:var(--text);
+  font-family:var(--serif);font-size:1.02rem;transition:color .2s,opacity .2s;
+}
+.toclist a:hover{color:var(--violet)}
+.toc-aspect a{color:var(--c)}
+.toc-aspect a:hover{color:var(--c);opacity:.7}
+.toclist i{
+  font-style:normal;margin-left:auto;white-space:nowrap;
+  font-family:var(--mono);font-size:.58rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--faint);
+}
+#context,#closing,#glossary,#sources{scroll-margin-top:1.5rem}
 
 /* ── context ─────────────────────────────── */
 .context{width:var(--col);margin:5rem auto}
@@ -213,6 +245,20 @@ main,.topbar{position:relative;z-index:1}
   background:var(--c);opacity:.5;flex:none;
 }
 
+.balance{padding-top:.4rem}
+.balance .p-head{color:var(--c)}
+.mech{color:#C3CAD9;margin-bottom:1.1rem}
+.tell{
+  border-left:2px solid var(--c);padding-left:1.2rem;
+  font-family:var(--serif);font-size:clamp(1rem,2.3vw,1.12rem);
+  color:#EDEFF5;line-height:1.55;
+}
+.tell span{
+  display:block;font-family:var(--mono);font-size:.56rem;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--c);opacity:.8;margin-bottom:.35rem;
+}
+.bridge{color:var(--muted);font-size:.92rem;line-height:1.6;margin-bottom:1.2rem}
+
 .remedies{padding-top:.4rem}
 .remedies .p-head{color:var(--c)}
 .rem{list-style:none;display:grid;gap:.7rem}
@@ -274,10 +320,15 @@ main,.topbar{position:relative;z-index:1}
 
 /* ── motion ──────────────────────────────── */
 @keyframes bloom{from{opacity:0;transform:scale(.72)}to{opacity:1;transform:scale(1)}}
-.op,.ip,.core{animation:bloom .8s cubic-bezier(.2,.8,.3,1) backwards;animation-delay:var(--d,0s)}
+.op,.ip,.core{opacity:0}
+.bloomed .op,.bloomed .ip,.bloomed .core{
+  opacity:1;animation:bloom .8s cubic-bezier(.2,.8,.3,1) backwards;
+  animation-delay:var(--d,0s);
+}
 @media(prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
-  .op,.ip,.core{animation:none}
+  .op,.ip,.core{opacity:1}
+  .bloomed .op,.bloomed .ip,.bloomed .core{animation:none}
   *{transition-duration:.01ms !important}
 }
 </style>
@@ -291,7 +342,7 @@ main,.topbar{position:relative;z-index:1}
     <button data-lang="de" aria-current="false">DE</button>
     <button data-lang="hr" aria-current="false">HR</button>
   </nav>
-  <span class="ver">v2 (a)</span>
+  <span class="ver">v5 (a)</span>
 </header>
 
 <main>
@@ -300,18 +351,15 @@ main,.topbar{position:relative;z-index:1}
     <h1 id="h-title"></h1>
     <p class="lede" id="h-lede"></p>
 
-    <svg class="symbol" viewBox="0 0 400 400" role="img" aria-labelledby="sym-t">
-      <title id="sym-t">The Mother's symbol. Four inner petals, one for each power.</title>
-      <g id="outer"></g>
-      <g id="inner"></g>
-      <circle class="core" cx="200" cy="200" r="20" style="--d:1.55s"></circle>
-    </svg>
-    <p class="hint" id="hint"></p>
-
     <p class="attrs" id="h-attrs"></p>
   </section>
 
-  <section class="context">
+  <nav class="toc" aria-labelledby="toc-h">
+    <p class="eyebrow" id="toc-h"></p>
+    <ol class="toclist" id="toc-list"></ol>
+  </nav>
+
+  <section class="context" id="context">
     <p class="eyebrow" id="c-eyebrow"></p>
     <h2 id="c-title"></h2>
     <div class="grid2 prose" id="c-body"></div>
@@ -319,7 +367,7 @@ main,.topbar{position:relative;z-index:1}
 
   <div id="aspects"></div>
 
-  <section class="closing">
+  <section class="closing" id="closing">
     <div class="wrap">
       <p class="eyebrow" id="z-eyebrow"></p>
       <h2 id="z-title"></h2>
@@ -327,7 +375,7 @@ main,.topbar{position:relative;z-index:1}
     </div>
   </section>
 
-  <section class="gloss">
+  <section class="gloss" id="glossary">
     <div class="wrap">
       <p class="eyebrow" id="g-eyebrow"></p>
       <h2 id="g-title"></h2>
@@ -336,10 +384,20 @@ main,.topbar{position:relative;z-index:1}
     </div>
   </section>
 
-  <footer class="foot">
+  <footer class="foot" id="sources">
     <div class="wrap">
       <h2 id="f-title"></h2>
       <ul class="src" id="f-list"></ul>
+    </div>
+
+    <div class="coda">
+    <svg class="symbol" viewBox="0 0 400 400" role="img" aria-labelledby="sym-t">
+      <title id="sym-t">The Mother's symbol. Four inner petals, one for each power.</title>
+      <g id="outer"></g>
+      <g id="inner"></g>
+      <circle class="core" cx="200" cy="200" r="20" style="--d:1.55s"></circle>
+    </svg>
+    <p class="hint" id="hint"></p>
       <p class="sign" id="f-sign"></p>
     </div>
   </footer>
@@ -370,7 +428,7 @@ en:{
   hint:"Tap a petal",
   attrs:"Wisdom · Strength · Harmony · Perfection",
   L:{element:"Element",pillar:"Matrimandir",attribute:"Attribute",shadow:"Shadow",
-     remedies:"Remedies",attrib:"Sri Aurobindo · The Mother · VI",orig:"Original, English"},
+     remedies:"Remedies",attrib:"Sri Aurobindo · The Mother · VI",orig:"Original, English",balance:"Healing the imbalance",tellPrefix:"You are in it when",toc:"Contents"},
   dirs:{N:"North",E:"East",S:"South",W:"West"},
 
   ctxEyebrow:"Background",
@@ -388,6 +446,9 @@ en:{
       motto:"Wisdom · Knowledge · Vastness",
       quote:"For she is the mighty and wise One who opens us to the supramental infinites &amp; cosmic vastness, to the grandeur of the supreme Light, to a treasure-house of miraculous knowledge, to the measureless movement of the Mother's eternal forces. Tranquil is she and wonderful, great and calm for ever. Nothing can move her because all wisdom is in her…",
       essence:"Sri Aurobindo seats her in the wideness above thinking mind and will. She lays down the large lines of the world forces: she sees the whole, and how it must be. She meets each person according to their own nature, giving the wise a greater light and leading the blind according to their blindness. Her compassion has no end. Even her refusals are only a postponement, even her punishments are a grace. But compassion never bends her from the truth of a thing, and she can feel too calm and too far away for a small nature to reach.",
+      imbalance:"Air rises and abstracts. That is its gift and its trap. A mind wide enough to hold the whole picture will, if nothing checks it, seize one frame and call it the truth, and from there the slide is quick: vastness narrows to a view, the view hardens into a belief, the belief becomes dogma. Everything else on the card follows from that single move. You judge, because a fixed position needs a wrong to define its right. You criticise, and turn cynical when the world declines to match. You overthink, because thought is now the only instrument you trust. The opposite failure is the same element in the other direction: too much air and you lift off entirely, detached, analysing a life instead of standing in one.",
+      tell:"You are arguing in your head with someone who is not in the room.",
+      bridge:"Notice that not one of them argues with the belief. They all work upstream of it, treating conviction as something editable rather than something you are. Remote viewing and the third eye are that same faculty running clean: perception without grip.",
       shadow:["Beliefs","Dogma","Judgemental, wrong or right","Critical","Cynical","Narrow minded","Stuck in opinions","Blaming","Overthinking, analysis paralysis","Detached, cut off","Too much in the air, not grounded","Manipulative"],
       remedies:[
         {t:"Conscious creator",d:"moving from programmed automaton into the blueprint of the soul"},
@@ -405,6 +466,9 @@ en:{
       motto:"Transformation · Noble Aims",
       quote:"There is in her an overwhelming intensity, a mighty passion of force to achieve, a divine violence rushing to shatter every limit and obstacle.",
       essence:"Not wideness but height, Sri Aurobindo writes; not wisdom but force. She is swiftness: the direct stroke, the frontal assault that carries everything before it. Indifference, negligence and sloth in the work she cannot bear, and she will wake a sleeper with sharp pain if that is what is needed. Her love is as fierce as her wrath. Without her, what is done in a day might have taken centuries. But few can carry her working, and when a disciple asked which aspects to keep in front, Sri Aurobindo named the other two.",
+      imbalance:"Fire consumes. Aimed at an obstacle it clears the way; aimed at a person it burns them. Every item on that card is one movement, force that has lost its aim. Rage is force without direction. Overpowering is force without consent. My way or the highway is force without patience. Grand showy actions with little depth is force that has turned into display. Underneath all of them sits the ego, and that is the actual fault: Kali's intensity still at full strength, but serving the small self instead of the work. Dark magic is only the end of that road, force turned deliberately against another.",
+      tell:"Being right matters more to you than the thing you were trying to do.",
+      bridge:"You cannot reason with fire, and none of these tries. Each one is either a container or a discharge: the ceremony gives it a hearth, the breathwork a controlled burn, sound and vibration a channel, karmic clearing something legitimate to consume. Transcending ego is the real cure, because ego is what misaims the fire in the first place.",
       shadow:["Rage, anger, violence, aggression","Misuse of power, overpowering","Destructive behaviour","My way or the highway","Grand showy actions, little depth","Ego, big self and small self","Hard behaviour","Dark magic"],
       remedies:[
         {t:"Fire ceremony"},
@@ -423,6 +487,9 @@ en:{
       motto:"Divine Rhythm · Unity",
       quote:"Harmony and Beauty of the Mind &amp; Soul, harmony and Beauty of the Thoughts &amp; feelings, Harmony and Beauty in every outward act &amp; movement, Harmony and Beauty of the Life &amp; surroundings, this is the demand of Mahalakshmi.",
       essence:"Without her, Sri Aurobindo says, wisdom and force would be incomplete. She is the attraction that draws things and beings together so that a hidden delight can play through them, and she is the aspect the human heart reaches for most easily: Maheshwari can seem too vast, Mahakali too formidable, but everyone turns towards Mahalakshmi. She is also the hardest to keep. She does not insist and she does not fight for her place. Where things are coarse or mean, or a heart is crowded with grudge, she simply veils her face and waits.",
+      imbalance:"Water flows and takes a shape. Dam it and it stagnates; leave it no banks and it floods. Both failures are on that card. Hiding your feelings is the dam, and what stands behind it turns to shame and jealousy. Being swept off in feeling is the flood. Victim consciousness is water that has found a low place and stopped moving. People pleasing is water taking someone else's shape because it has no banks of its own. And scarcity and greed are one thing said twice: a heart that does not trust the flow will hoard against it.",
+      tell:"You are keeping score.",
+      bridge:"Sri Aurobindo gives the logic himself. She does not fight for her place; where things are coarse, or a heart is crowded with grudge, she veils her face and waits. So none of this summons her. It clears what drove her out, which is why the whole card is forgiveness work. You make the room fit to live in, and she returns on her own.",
       shadow:["Not in touch with your feelings, hiding feelings","Dwelling in negative feelings, swept away by feelings","Victim consciousness, poor me","No self love, shame, jealousy","People pleasing","Emotionally manipulative","Scarcity consciousness","Greed, over-accumulation of pleasures, addictions","Not forgiving, self and others"],
       remedies:[
         {t:"Trauma relief, psychotherapy"},
@@ -441,6 +508,9 @@ en:{
       motto:"Right Time · Right Instrument · Right Process",
       quote:"Mahasaraswati is the Mother's Power of Work &amp; her Spirit of Perfection and order… She is the most skillful in executive faculty and the nearest to physical Nature… she presides over their detail of organization &amp; execution.",
       essence:"The youngest of the four and the closest to physical nature. Maheshwari lays the large lines, Mahakali drives the energy, Mahalakshmi finds the rhythm, and Mahasaraswati takes the detail: the fit of the parts, the exactness of the result. Science, craft and technique are her province. Her work is minute and can seem interminable to impatience, but nothing is skipped and nothing is left half done. She is the most patient of the four with human imperfection, on one condition: that your will is single and straight. A double mind she will not carry, and her irony is merciless to pretence.",
+      imbalance:"Earth holds form. Too much of it and she sets: stuckness, tamas, the body that will not move. Too little and form collapses into unhealthy habit and disordered eating, a life with no rhythm in it. But the subtlest failure on that card is also the deepest, following rules even when they go against your values. That is Earth's own gift turned counterfeit. Her whole nature is right process, and the forgery of right process is mere procedure: you keep the form and lose the reason for it. Stress and overload is the same forgery, work as a casing you sit inside rather than a thing you are doing.",
+      tell:"You can explain exactly why you are doing something you do not want to do.",
+      bridge:"Nothing on that card is psychological. It is all body: food, sleep, breath, movement, meridians, herbs, animals, shaking. That is not an oversight. Earth's imbalance cannot be argued with, because the mind is not where it lives. You shift it by changing what your hands and feet actually do, daily.",
       shadow:["Stuckness","Tamasic","Laziness","Unhealthy behaviour, eating disorder","Too much in the vital","Stressed, overloaded with work","Following rules even when they go against your values","Out of harmony in what you do"],
       remedies:[
         {t:"Healthy habits",d:"food, sports, yoga, nature, sleep, breathing, feng shui, decluttering"},
@@ -505,7 +575,7 @@ de:{
   hint:"Tippe auf ein Blütenblatt",
   attrs:"Weisheit · Stärke · Harmonie · Vollkommenheit",
   L:{element:"Element",pillar:"Matrimandir",attribute:"Attribut",shadow:"Schatten",
-     remedies:"Heilmittel",attrib:"Sri Aurobindo · Die Mutter · VI",orig:"Original, Englisch"},
+     remedies:"Heilmittel",attrib:"Sri Aurobindo · Die Mutter · VI",orig:"Original, Englisch",balance:"Das Ungleichgewicht heilen",tellPrefix:"Du steckst darin, wenn",toc:"Inhalt"},
   dirs:{N:"Norden",E:"Osten",S:"Süden",W:"Westen"},
 
   ctxEyebrow:"Hintergrund",
@@ -524,6 +594,9 @@ de:{
       quote:"Denn sie ist die Mächtige und Weise, die uns den supramentalen Unendlichkeiten und der kosmischen Weite öffnet, der Größe des höchsten Lichtes, einer Schatzkammer wunderbaren Wissens, der unermesslichen Bewegung der ewigen Kräfte der Mutter. Ruhig ist sie und wunderbar, groß und für immer gelassen. Nichts kann sie bewegen, denn alle Weisheit ist in ihr…",
       quoteEn:"For she is the mighty and wise One who opens us to the supramental infinites &amp; cosmic vastness, to the grandeur of the supreme Light, to a treasure-house of miraculous knowledge, to the measureless movement of the Mother's eternal forces. Tranquil is she and wonderful, great and calm for ever. Nothing can move her because all wisdom is in her…",
       essence:"Sri Aurobindo setzt sie in die Weite oberhalb von denkendem Geist und Willen. Sie legt die großen Linien der Weltkräfte fest: sie sieht das Ganze und wie es sein muss. Jedem Menschen begegnet sie gemäß seiner eigenen Natur, den Weisen gibt sie ein größeres Licht, die Blinden führt sie gemäß ihrer Blindheit. Ihr Mitgefühl hat kein Ende. Selbst ihre Zurückweisungen sind nur ein Aufschub, selbst ihre Strafen sind eine Gnade. Doch Mitgefühl beugt sie niemals von der Wahrheit einer Sache ab, und sie kann zu ruhig und zu fern wirken, als dass eine kleine Natur sie erreichen könnte.",
+      imbalance:"Luft steigt auf und abstrahiert. Das ist ihre Gabe und ihre Falle. Ein Geist, weit genug für das ganze Bild, greift sich, wenn nichts ihn hält, einen einzigen Rahmen heraus und nennt ihn die Wahrheit. Von dort geht es schnell: Weite verengt sich zu einer Ansicht, die Ansicht erhärtet zum Glaubenssatz, der Glaubenssatz wird Dogma. Alles Weitere auf der Karte folgt aus diesem einen Zug. Du urteilst, denn eine feste Position braucht ein Falsch, um ihr Richtig zu bestimmen. Du kritisierst und wirst zynisch, wenn die Welt sich weigert zu passen. Du grübelst, denn Denken ist nun das einzige Werkzeug, dem du traust. Die Gegenrichtung ist dasselbe Element, nur anders gescheitert: zu viel Luft, und du hebst ab, abgetrennt, ein Leben analysierend statt in einem zu stehen.",
+      tell:"Du streitest im Kopf mit jemandem, der nicht im Raum ist.",
+      bridge:"Beachte: keines davon streitet mit dem Glaubenssatz. Alle setzen oberhalb davon an und behandeln Überzeugung als etwas Veränderbares statt als etwas, das du bist. Fernwahrnehmung und das dritte Auge sind dieselbe Fähigkeit, sauber laufend: Wahrnehmung ohne Griff.",
       shadow:["Glaubenssätze","Dogma","Urteilend, richtig oder falsch","Kritisch","Zynisch","Engstirnig","In Meinungen festgefahren","Schuldzuweisung","Grübeln, Analyse-Lähmung","Abgetrennt, abgeschnitten","Zu sehr in der Luft, nicht geerdet","Manipulativ"],
       remedies:[
         {t:"Bewusster Schöpfer",d:"vom programmierten Automaten in den Bauplan der Seele"},
@@ -542,6 +615,9 @@ de:{
       quote:"In ihr ist eine überwältigende Intensität, eine mächtige Leidenschaft der Kraft, zu vollbringen, eine göttliche Gewalt, die heranstürmt, um jede Grenze und jedes Hindernis zu zerschmettern.",
       quoteEn:"There is in her an overwhelming intensity, a mighty passion of force to achieve, a divine violence rushing to shatter every limit and obstacle.",
       essence:"Nicht Weite, sondern Höhe, schreibt Sri Aurobindo; nicht Weisheit, sondern Kraft. Sie ist Schnelligkeit: der direkte Schlag, der Frontalangriff, der alles vor sich her trägt. Gleichgültigkeit, Nachlässigkeit und Trägheit im Werk erträgt sie nicht, und sie weckt den Schlafenden notfalls mit scharfem Schmerz. Ihre Liebe ist so heftig wie ihr Zorn. Ohne sie könnte das, was an einem Tag geschieht, Jahrhunderte gedauert haben. Doch nur wenige tragen ihr Wirken, und als ein Schüler fragte, welche Aspekte man vorne halten solle, nannte Sri Aurobindo die beiden anderen.",
+      imbalance:"Feuer verzehrt. Auf ein Hindernis gerichtet, räumt es den Weg; auf einen Menschen gerichtet, verbrennt es ihn. Jeder Punkt auf der Karte ist eine einzige Bewegung: Kraft, die ihr Ziel verloren hat. Wut ist Kraft ohne Richtung. Überwältigung ist Kraft ohne Einverständnis. Mein Weg oder gar nicht ist Kraft ohne Geduld. Große Show mit wenig Tiefe ist Kraft, die zur Zurschaustellung geworden ist. Unter allem sitzt das Ego, und das ist der eigentliche Fehler: Kalis Intensität in voller Stärke, aber im Dienst des kleinen Selbst statt des Werkes. Schwarze Magie ist nur das Ende dieses Weges, Kraft, absichtlich gegen einen anderen gewendet.",
+      tell:"Rechthaben ist dir wichtiger als das, was du eigentlich tun wolltest.",
+      bridge:"Mit Feuer lässt sich nicht reden, und keines davon versucht es. Jedes ist entweder ein Gefäß oder eine Entladung: die Zeremonie gibt ihm eine Feuerstelle, das Atmen einen kontrollierten Brand, Klang und Schwingung einen Kanal, karmische Reinigung etwas Legitimes zum Verzehren. Das Ego zu überschreiten ist die eigentliche Heilung, denn das Ego ist es, was das Feuer falsch richtet.",
       shadow:["Wut, Zorn, Gewalt, Aggression","Machtmissbrauch, Überwältigung","Zerstörerisches Verhalten","Mein Weg oder gar nicht","Große Show, wenig Tiefe","Ego, großes und kleines Selbst","Hartes Verhalten","Schwarze Magie"],
       remedies:[
         {t:"Feuerzeremonie"},
@@ -561,6 +637,9 @@ de:{
       quote:"Harmonie und Schönheit des Geistes und der Seele, Harmonie und Schönheit der Gedanken und Gefühle, Harmonie und Schönheit in jeder äußeren Handlung und Bewegung, Harmonie und Schönheit des Lebens und der Umgebung: das ist die Forderung Mahalakshmis.",
       quoteEn:"Harmony and Beauty of the Mind &amp; Soul, harmony and Beauty of the Thoughts &amp; feelings, Harmony and Beauty in every outward act &amp; movement, Harmony and Beauty of the Life &amp; surroundings, this is the demand of Mahalakshmi.",
       essence:"Ohne sie, sagt Sri Aurobindo, blieben Weisheit und Kraft unvollständig. Sie ist die Anziehung, die Dinge und Wesen zusammenführt, damit eine verborgene Wonne durch sie spielen kann, und sie ist der Aspekt, nach dem das menschliche Herz am leichtesten greift: Maheshwari kann zu weit erscheinen, Mahakali zu furchtbar, doch alle wenden sich Mahalakshmi zu. Sie ist zugleich am schwersten zu halten. Sie besteht nicht auf sich und kämpft nicht um ihren Platz. Wo es grob oder gemein ist oder ein Herz von Groll erfüllt, verhüllt sie einfach ihr Gesicht und wartet.",
+      imbalance:"Wasser fließt und nimmt eine Form an. Staue es, und es fault; lass ihm keine Ufer, und es überschwemmt. Beide Fehlformen stehen auf der Karte. Gefühle zu verbergen ist der Damm, und was sich dahinter staut, wird zu Scham und Eifersucht. Von Gefühlen fortgerissen zu werden ist die Flut. Opferbewusstsein ist Wasser, das eine Senke gefunden hat und stehen blieb. Gefallsucht ist Wasser, das die Form eines anderen annimmt, weil es keine eigenen Ufer hat. Und Mangel und Gier sind dasselbe, zweimal gesagt: ein Herz, das dem Fließen nicht traut, hortet dagegen an.",
+      tell:"Du führst Buch.",
+      bridge:"Sri Aurobindo liefert die Logik selbst. Sie kämpft nicht um ihren Platz; wo es grob ist oder ein Herz von Groll erfüllt, verhüllt sie ihr Gesicht und wartet. Nichts hiervon ruft sie also herbei. Es räumt weg, was sie vertrieben hat, und darum ist die ganze Karte Vergebungsarbeit. Du machst den Raum bewohnbar, und sie kommt von selbst zurück.",
       shadow:["Kein Kontakt zu den eigenen Gefühlen, Gefühle verbergen","In negativen Gefühlen verweilen, von Gefühlen fortgerissen","Opferbewusstsein, armes Ich","Keine Selbstliebe, Scham, Eifersucht","Gefallsucht","Emotional manipulativ","Mangelbewusstsein","Gier, Anhäufung von Genüssen, Süchte","Nicht vergeben, sich selbst und anderen"],
       remedies:[
         {t:"Traumaentlastung, Psychotherapie"},
@@ -580,6 +659,9 @@ de:{
       quote:"Mahasaraswati ist die Arbeitskraft der Mutter und ihr Geist der Vollkommenheit und Ordnung… Sie ist die Geschickteste in der ausführenden Fähigkeit und der physischen Natur am nächsten… sie waltet über deren Einzelheiten der Organisation und Ausführung.",
       quoteEn:"Mahasaraswati is the Mother's Power of Work &amp; her Spirit of Perfection and order… She is the most skillful in executive faculty and the nearest to physical Nature… she presides over their detail of organization &amp; execution.",
       essence:"Die Jüngste der Vier und der physischen Natur am nächsten. Maheshwari legt die großen Linien, Mahakali treibt die Energie, Mahalakshmi findet den Rhythmus, und Mahasaraswati nimmt das Detail: das Ineinandergreifen der Teile, die Genauigkeit des Ergebnisses. Wissenschaft, Handwerk und Technik sind ihr Feld. Ihre Arbeit ist kleinteilig und kann der Ungeduld endlos scheinen, doch nichts wird übersprungen und nichts halb gelassen. Von den Vieren ist sie die Geduldigste mit menschlicher Unvollkommenheit, unter einer Bedingung: dass dein Wille einfach und gerade ist. Zwiespältigkeit duldet sie nicht, und ihre Ironie ist gnadenlos gegenüber der Pose.",
+      imbalance:"Erde hält Form. Zu viel davon, und sie erstarrt: Feststecken, Tamas, der Körper, der sich nicht rührt. Zu wenig, und die Form zerfällt in ungesunde Gewohnheit und Essstörung, ein Leben ohne Rhythmus. Doch die feinste Fehlform auf der Karte ist zugleich die tiefste: Regeln folgen, auch wenn sie gegen die eigenen Werte gehen. Das ist Erdes eigene Gabe als Fälschung. Ihr ganzes Wesen ist rechter Prozess, und die Fälschung des rechten Prozesses ist bloße Prozedur: du behältst die Form und verlierst ihren Grund. Stress und Überladung ist dieselbe Fälschung, Arbeit als Gehäuse, in dem du sitzt, statt als etwas, das du tust.",
+      tell:"Du kannst genau erklären, warum du etwas tust, das du nicht tun willst.",
+      bridge:"Nichts auf dieser Karte ist psychologisch. Alles ist Körper: Essen, Schlaf, Atem, Bewegung, Meridiane, Kräuter, Tiere, Schütteln. Das ist kein Versehen. Mit Erdes Fehlform lässt sich nicht argumentieren, denn im Kopf wohnt sie nicht. Du verschiebst sie, indem du änderst, was deine Hände und Füße täglich tatsächlich tun.",
       shadow:["Feststecken","Tamasisch","Faulheit","Ungesundes Verhalten, Essstörung","Zu sehr im Vitalen","Gestresst, mit Arbeit überladen","Regeln folgen, auch gegen die eigenen Werte","Ohne Harmonie in dem, was du tust"],
       remedies:[
         {t:"Gesunde Gewohnheiten",d:"Ernährung, Sport, Yoga, Natur, Schlaf, Atem, Feng Shui, Ausmisten"},
@@ -644,7 +726,7 @@ hr:{
   hint:"Dodirni laticu",
   attrs:"Mudrost · Snaga · Sklad · Savršenstvo",
   L:{element:"Element",pillar:"Matrimandir",attribute:"Svojstvo",shadow:"Sjena",
-     remedies:"Lijekovi",attrib:"Sri Aurobindo · Majka · VI",orig:"Izvornik, engleski"},
+     remedies:"Lijekovi",attrib:"Sri Aurobindo · Majka · VI",orig:"Izvornik, engleski",balance:"Iscjeljenje neravnoteže",tellPrefix:"U tome si kad",toc:"Sadržaj"},
   dirs:{N:"Sjever",E:"Istok",S:"Jug",W:"Zapad"},
 
   ctxEyebrow:"Pozadina",
@@ -663,6 +745,9 @@ hr:{
       quote:"Jer ona je moćna i mudra, ona koja nas otvara supramentalnim beskrajima i kozmičkom prostranstvu, veličanstvenosti vrhovnog Svjetla, riznici čudesnog znanja, nemjerljivom kretanju Majčinih vječnih sila. Spokojna je i čudesna, velika i zauvijek mirna. Ništa je ne može pomaknuti jer sva je mudrost u njoj…",
       quoteEn:"For she is the mighty and wise One who opens us to the supramental infinites &amp; cosmic vastness, to the grandeur of the supreme Light, to a treasure-house of miraculous knowledge, to the measureless movement of the Mother's eternal forces. Tranquil is she and wonderful, great and calm for ever. Nothing can move her because all wisdom is in her…",
       essence:"Sri Aurobindo smješta je u prostranstvo iznad mislećeg uma i volje. Ona postavlja velike linije svjetskih sila: vidi cjelinu i vidi kakva mora biti. Svakome pristupa prema njegovoj vlastitoj prirodi, mudrima daje veće svjetlo, slijepe vodi prema njihovoj sljepoći. Njezino suosjećanje nema kraja. I njezina su odbijanja tek odgoda, i njezine su kazne milost. No suosjećanje je nikada ne odvraća od istine neke stvari, a može djelovati previše mirno i previše daleko da bi je mala priroda dosegnula.",
+      imbalance:"Zrak se diže i apstrahira. To je njegov dar i njegova zamka. Um dovoljno širok da obuhvati cijelu sliku, ako ga ništa ne zaustavi, izdvojit će jedan okvir i nazvati ga istinom. Odatle ide brzo: prostranstvo se sužava u stav, stav se stvrdne u uvjerenje, uvjerenje postaje dogma. Sve ostalo na kartici slijedi iz tog jednog poteza. Osuđuješ, jer čvrsta pozicija treba krivo da bi odredila svoje ispravno. Kritiziraš i postaješ ciničan kad se svijet odbija poklopiti. Previše razmišljaš, jer je misao sad jedini alat kojem vjeruješ. Suprotan smjer isti je element koji je zakazao drugačije: previše zraka i odlebdiš, odsječen, analizirajući život umjesto da stojiš u njemu.",
+      tell:"Raspravljaš u glavi s nekim tko nije u sobi.",
+      bridge:"Primijeti: nijedan od njih ne raspravlja s uvjerenjem. Svi rade uzvodno od njega i tretiraju uvjerenje kao nešto što se može prepisati, a ne kao nešto što jesi. Daljinsko gledanje i treće oko ista su sposobnost koja radi čisto: opažanje bez stiska.",
       shadow:["Uvjerenja","Dogma","Osuđivanje, ispravno ili krivo","Kritičnost","Cinizam","Uskogrudnost","Zaglavljenost u stavovima","Okrivljavanje","Pretjerano razmišljanje, paraliza analizom","Odvojenost, odsječenost","Previše u zraku, neuzemljenost","Manipulativnost"],
       remedies:[
         {t:"Svjesni stvaratelj",d:"iz programiranog automata u nacrt duše"},
@@ -681,6 +766,9 @@ hr:{
       quote:"U njoj je silovita intenzivnost, moćna strast sile da postigne, božansko nasilje koje nadire da razbije svaku granicu i svaku prepreku.",
       quoteEn:"There is in her an overwhelming intensity, a mighty passion of force to achieve, a divine violence rushing to shatter every limit and obstacle.",
       essence:"Ne prostranstvo nego visina, piše Sri Aurobindo; ne mudrost nego sila. Ona je brzina: izravan udarac, čeoni nalet koji nosi sve pred sobom. Ravnodušnost, nemar i tromost u radu ne podnosi i probudit će usnulog oštrom boli ako je to potrebno. Njezina je ljubav jednako žestoka kao i njezin gnjev. Bez nje bi ono što se učini u jednom danu moglo trajati stoljećima. No malo tko podnosi njezino djelovanje, i kad je učenik pitao koje aspekte držati sprijeda, Sri Aurobindo je imenovao druga dva.",
+      imbalance:"Vatra proždire. Usmjerena na prepreku, čisti put; usmjerena na čovjeka, spaljuje ga. Svaka stavka na toj kartici jedan je isti pokret: sila koja je izgubila cilj. Bijes je sila bez smjera. Nadmoć je sila bez pristanka. Moje ili ništa je sila bez strpljenja. Velike geste s malo dubine su sila koja je postala predstava. Ispod svega sjedi ego, i to je prava pogreška: Kalina intenzivnost u punoj snazi, ali u službi malog ja umjesto djela. Crna magija samo je kraj tog puta, sila namjerno okrenuta protiv drugoga.",
+      tell:"Važnije ti je da si u pravu nego ono što si htio postići.",
+      bridge:"S vatrom se ne pregovara, i nijedan to ne pokušava. Svaki je ili posuda ili pražnjenje: ceremonija joj daje ognjište, disanje kontrolirano gorenje, zvuk i vibracija kanal, karmičko čišćenje nešto legitimno za proždrijeti. Nadilaženje ega je pravi lijek, jer ego je taj koji vatru krivo usmjeri.",
       shadow:["Bijes, ljutnja, nasilje, agresija","Zloupotreba moći, nadmoć","Destruktivno ponašanje","Moje ili ništa","Velike geste, malo dubine","Ego, veliko i malo ja","Tvrdo ponašanje","Crna magija"],
       remedies:[
         {t:"Ceremonija vatre"},
@@ -700,6 +788,9 @@ hr:{
       quote:"Sklad i ljepota uma i duše, sklad i ljepota misli i osjećaja, sklad i ljepota u svakom vanjskom činu i pokretu, sklad i ljepota života i okoline: to je zahtjev Mahalakshmi.",
       quoteEn:"Harmony and Beauty of the Mind &amp; Soul, harmony and Beauty of the Thoughts &amp; feelings, Harmony and Beauty in every outward act &amp; movement, Harmony and Beauty of the Life &amp; surroundings, this is the demand of Mahalakshmi.",
       essence:"Bez nje bi, kaže Sri Aurobindo, mudrost i sila ostale nepotpune. Ona je privlačnost koja spaja stvari i bića da bi kroz njih zaigrala skrivena radost, i ona je aspekt za kojim ljudsko srce najlakše poseže: Maheshwari može djelovati previše prostrano, Mahakali previše strašno, ali svi se okreću Mahalakshmi. Ona je ujedno i najteža za zadržati. Ne ustrajava i ne bori se za svoje mjesto. Gdje je grubo ili nisko, ili gdje je srce puno zamjeranja, ona jednostavno zastre lice i čeka.",
+      imbalance:"Voda teče i poprima oblik. Zaustavi je i ustajat će; ne daj joj obale i poplavit će. Oba su promašaja na toj kartici. Skrivanje osjećaja je brana, a ono što stoji iza nje pretvara se u sram i ljubomoru. Odnesenost osjećajima je poplava. Svijest žrtve je voda koja je našla nizinu i stala. Ugađanje drugima je voda koja poprima tuđi oblik jer nema vlastitih obala. A oskudica i pohlepa isto su rečeno dvaput: srce koje ne vjeruje toku gomilat će protiv njega.",
+      tell:"Vodiš račun tko je koliko dužan.",
+      bridge:"Sri Aurobindo sam daje logiku. Ona se ne bori za svoje mjesto; gdje je grubo ili gdje je srce puno zamjeranja, zastre lice i čeka. Ništa je od ovoga dakle ne doziva. Ovo raščišćava ono što ju je otjeralo, i zato je cijela kartica rad na opraštanju. Učiniš prostor takvim da se u njemu može živjeti, i ona se vrati sama.",
       shadow:["Bez dodira s vlastitim osjećajima, skrivanje osjećaja","Zadržavanje u negativnim osjećajima, odnesenost osjećajima","Svijest žrtve, jadan ja","Bez samoljublja, sram, ljubomora","Ugađanje drugima","Emocionalna manipulacija","Svijest oskudice","Pohlepa, gomilanje užitaka, ovisnosti","Neopraštanje, sebi i drugima"],
       remedies:[
         {t:"Otpuštanje traume, psihoterapija"},
@@ -719,6 +810,9 @@ hr:{
       quote:"Mahasaraswati je Majčina Moć Rada i njezin Duh savršenstva i reda… Ona je najvještija u izvedbenoj sposobnosti i najbliža fizičkoj Prirodi… ona upravlja pojedinostima organizacije i izvedbe.",
       quoteEn:"Mahasaraswati is the Mother's Power of Work &amp; her Spirit of Perfection and order… She is the most skillful in executive faculty and the nearest to physical Nature… she presides over their detail of organization &amp; execution.",
       essence:"Najmlađa od četiri i najbliža fizičkoj prirodi. Maheshwari postavlja velike linije, Mahakali pokreće energiju, Mahalakshmi pronalazi ritam, a Mahasaraswati preuzima detalj: uklapanje dijelova, točnost rezultata. Znanost, zanat i tehnika njezino su polje. Njezin je rad sitan i nestrpljivosti se može činiti beskrajnim, ali ništa se ne preskače i ništa ne ostaje napola. Od četiri je najstrpljivija s ljudskom nesavršenošću, uz jedan uvjet: da ti je volja jedna i ravna. Dvostruki um ne nosi, a njezina je ironija nemilosrdna prema pozi.",
+      imbalance:"Zemlja drži oblik. Previše toga i skruti se: zaglavljenost, tamas, tijelo koje se ne miče. Premalo i oblik se raspada u nezdravu naviku i poremećaj prehrane, u život bez ritma. No najsuptilniji promašaj na toj kartici ujedno je i najdublji: slijediti pravila i onda kad idu protiv vlastitih vrijednosti. To je vlastiti dar Zemlje kao krivotvorina. Cijela je njezina narav pravi proces, a krivotvorina pravog procesa je puka procedura: zadržiš oblik i izgubiš razlog. Stres i preopterećenost ista su krivotvorina, rad kao kućište u kojem sjediš umjesto kao nešto što radiš.",
+      tell:"Možeš točno objasniti zašto radiš nešto što ne želiš raditi.",
+      bridge:"Ništa na toj kartici nije psihološko. Sve je tijelo: hrana, san, dah, pokret, meridijani, bilje, životinje, tresenje. To nije previd. Sa Zemljinim promašajem se ne raspravlja, jer ne stanuje u glavi. Pomakneš ga tako da promijeniš što tvoje ruke i noge doista rade, svaki dan.",
       shadow:["Zaglavljenost","Tamasičnost","Lijenost","Nezdravo ponašanje, poremećaj prehrane","Previše u vitalnom","Stres, preopterećenost poslom","Slijeđenje pravila i kad su protiv vlastitih vrijednosti","Neusklađenost u onome što radiš"],
       remedies:[
         {t:"Zdrave navike",d:"hrana, sport, joga, priroda, san, disanje, feng shui, raščišćavanje"},
@@ -858,6 +952,17 @@ function render(lang){
   $('h-attrs').textContent   = t.attrs;
   clearLabel();
 
+  $('toc-h').textContent = t.L.toc;
+  $('toc-list').innerHTML =
+    `<li><a href="#context">${t.ctxTitle}</a></li>` +
+    t.aspects.map((a,i)=>
+      `<li class="toc-aspect" style="--c:var(${AXES[i].c})">` +
+      `<a href="#${AXES[i].id}">${a.name}<i>${a.element} · ${a.attribute}</i></a></li>`
+    ).join('') +
+    `<li><a href="#closing">${t.clTitle}</a></li>` +
+    `<li><a href="#glossary">${t.glTitle}</a></li>` +
+    `<li><a href="#sources">${t.srcTitle}</a></li>`;
+
   $('c-eyebrow').textContent = t.ctxEyebrow;
   $('c-title').textContent   = t.ctxTitle;
   $('c-body').innerHTML = t.ctx.map(b =>
@@ -894,8 +999,15 @@ function render(lang){
     <div class="chips">${a.shadow.map(s=>`<span class="chip">${s}</span>`).join('')}</div>
   </div>
 
+  <div class="panel balance">
+    <p class="p-head">${t.L.balance}</p>
+    <p class="mech">${a.imbalance}</p>
+    <p class="tell"><span>${t.L.tellPrefix}</span>${a.tell}</p>
+  </div>
+
   <div class="panel remedies">
     <p class="p-head">${t.L.remedies}</p>
+    <p class="bridge">${a.bridge}</p>
     <ul class="rem">${a.remedies.map(r=>
       `<li><b>${r.t}</b>${r.d?` <i>${r.d}</i>`:''}</li>`).join('')}</ul>
   </div>
@@ -924,6 +1036,21 @@ document.querySelectorAll('.langs button').forEach(b=>
   b.addEventListener('click',()=>render(b.dataset.lang)));
 
 render('en');
+
+/* The symbol now lives at the foot of the page, so the bloom waits until
+   it is actually on screen. No observer support means show it outright,
+   never leave it stranded at opacity 0. */
+(function bloomOnView(){
+  const svg = document.querySelector('.symbol');
+  if (!svg) return;
+  if (!('IntersectionObserver' in window)) { svg.classList.add('bloomed'); return; }
+  const io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if (e.isIntersecting) { svg.classList.add('bloomed'); io.disconnect(); }
+    });
+  }, {threshold:0.2});
+  io.observe(svg);
+})();
 </script>
 </body>
 </html>
