@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Four Powers · Balance Assessment</title>
+<style>
+:root{
+  --ink:#0B0E14; --surface:#10141C; --sunk:#0D1117;
+  --line:#212938; --line-soft:#181E29;
+  --text:#E6E9F0; --muted:#8A93A6; --faint:#5C6478;
+  --violet:#A78BFA;
+  --pearl:#CBD5F5; --ember:#FF4D5E; --aqua:#35C9E8; --leaf:#6FD97C;
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,'Times New Roman',serif;
+  --sans:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
+  --col:min(680px,100% - 2.2rem);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--ink);color:var(--text);font-family:var(--sans);
+  font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased;
+  min-height:100vh;min-height:100dvh;
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(60rem 40rem at 50% -12rem,rgba(167,139,250,.10),transparent 70%);
+}
+.eyebrow{font-family:var(--mono);font-size:.6rem;letter-spacing:.24em;text-transform:uppercase;color:var(--faint)}
+
+/* ── chrome ─────────────────────────────── */
+.topbar{
+  position:relative;z-index:2;display:flex;align-items:center;gap:1rem;
+  padding:.8rem max(1.1rem,calc((100% - 680px)/2));
+  border-bottom:1px solid var(--line-soft);
+}
+.home{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);text-decoration:none;white-space:nowrap}
+.home:hover{color:var(--violet)}
+.home::before{content:'\2190 '}
+.mark{font-family:var(--mono);font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--faint);flex:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.langs{display:flex;gap:.3rem}
+.langs button{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;background:none;
+  border:1px solid var(--line);color:var(--muted);padding:.28rem .5rem;border-radius:2px;cursor:pointer}
+.langs button:hover{color:var(--text);border-color:var(--violet)}
+.langs button[aria-current="true"]{color:var(--ink);background:var(--violet);border-color:var(--violet);font-weight:700}
+.ver{font-family:var(--mono);font-size:.56rem;color:var(--faint)}
+
+/* ── slides: one view at a time, never a scroll jump ── */
+main{position:relative;z-index:1}
+.view{display:none;width:var(--col);margin-inline:auto;padding-block:2.4rem 4rem}
+.view.on{display:block;animation:in .28s ease}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(2rem,7vw,3rem);
+  line-height:1.05;letter-spacing:-.02em;margin-block:.6rem 1rem}
+h2{font-family:var(--serif);font-weight:400;font-size:1.5rem;margin-block:.4rem .8rem}
+p{color:#C3CAD9;margin-block:.7rem}
+.lede{color:var(--muted)}
+
+.btn{
+  display:inline-block;font-family:var(--mono);font-size:.68rem;letter-spacing:.18em;
+  text-transform:uppercase;padding:.85rem 1.6rem;border-radius:2px;cursor:pointer;
+  background:var(--violet);color:var(--ink);border:1px solid var(--violet);font-weight:700;
+}
+.btn:hover{opacity:.88}
+.btn.ghost{background:none;color:var(--muted);border-color:var(--line);font-weight:400}
+.btn.ghost:hover{color:var(--text);border-color:var(--violet);opacity:1}
+.btns{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:2rem}
+
+.note{margin-top:1.6rem;padding:1rem 1.1rem;background:var(--sunk);
+  border:1px solid var(--line-soft);border-radius:3px;font-size:.86rem;color:var(--muted)}
+.note b{color:var(--text)}
+.method{border-left:2px solid var(--violet);padding-left:1.1rem;margin-top:1.6rem}
+.method dt{font-family:var(--mono);font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--violet);margin-top:1rem}
+.method dd{font-size:.9rem;color:var(--muted);margin-top:.15rem}
+
+/* ── question ───────────────────────────── */
+.prog{display:flex;align-items:center;gap:.9rem;margin-bottom:2.2rem}
+.prog-bar{flex:1;height:2px;background:var(--line);overflow:hidden}
+.prog-bar i{display:block;height:100%;background:var(--violet);transition:width .3s ease}
+.prog-n{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;color:var(--faint);white-space:nowrap}
+.frame{font-family:var(--mono);font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--violet);opacity:.8;margin-bottom:.7rem}
+.qtext{font-family:var(--serif);font-size:clamp(1.3rem,4.2vw,1.75rem);line-height:1.4;
+  color:#EDEFF5;margin-bottom:2rem;min-height:3.4em}
+.opts{display:grid;gap:.5rem}
+.opt{
+  display:flex;align-items:center;gap:.9rem;width:100%;text-align:left;cursor:pointer;
+  background:var(--sunk);border:1px solid var(--line);border-radius:3px;
+  padding:.9rem 1.1rem;color:var(--text);font-family:var(--sans);font-size:.98rem;
+  transition:border-color .15s,background .15s;
+}
+.opt:hover{border-color:var(--violet)}
+.opt span{width:13px;height:13px;border-radius:50%;border:1px solid var(--faint);flex:none;transition:.15s}
+.opt:hover span{border-color:var(--violet)}
+.opt[aria-checked="true"]{border-color:var(--violet);background:rgba(167,139,250,.10)}
+.opt[aria-checked="true"] span{background:var(--violet);border-color:var(--violet);box-shadow:inset 0 0 0 3px var(--sunk)}
+.qnav{margin-top:1.6rem}
+
+/* ── results ────────────────────────────── */
+.power{border-top:1px solid var(--line-soft);padding-block:1.5rem}
+.power:first-of-type{border-top:0}
+.p-top{display:flex;align-items:baseline;gap:.7rem;flex-wrap:wrap}
+.p-name{font-family:var(--serif);font-size:1.35rem;letter-spacing:.13em;text-transform:uppercase;color:var(--c)}
+.p-el{font-family:var(--mono);font-size:.56rem;letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
+.p-state{margin-left:auto;font-family:var(--mono);font-size:.58rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--c);border:1px solid var(--c);border-radius:99px;padding:.16rem .6rem}
+.bars{margin:.9rem 0 .8rem}
+.bar{display:flex;align-items:center;gap:.8rem;margin-top:.35rem}
+.bar b{font-family:var(--mono);font-size:.54rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--faint);font-weight:400;width:4.6rem;flex:none}
+.bar u{flex:1;height:6px;background:var(--line);text-decoration:none;overflow:hidden;border-radius:99px}
+.bar u i{display:block;height:100%;background:var(--c);border-radius:99px;transition:width .6s ease}
+.bar u.sh i{background:repeating-linear-gradient(90deg,var(--c) 0 3px,transparent 3px 6px)}
+.bar em{font-family:var(--mono);font-size:.6rem;color:var(--muted);font-style:normal;width:2.2rem;text-align:right;flex:none}
+.p-read{font-size:.93rem;color:#C3CAD9;line-height:1.6}
+
+.verdict{background:var(--sunk);border:1px solid var(--line-soft);border-radius:3px;
+  padding:1.2rem 1.2rem 1.3rem;margin-bottom:2rem}
+.verdict h3{font-family:var(--serif);font-weight:400;font-size:1.2rem;margin-bottom:.4rem}
+.verdict p{font-size:.92rem;margin-block:.5rem}
+.axis{font-family:var(--mono);font-size:.6rem;letter-spacing:.12em;color:var(--faint);margin-top:.9rem}
+.axis b{color:var(--violet);font-weight:400}
+
+/* ── remedy ─────────────────────────────── */
+.rx{border-left:2px solid var(--c);padding-left:1.3rem;margin-bottom:2.2rem}
+.rx-h{font-family:var(--mono);font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--c)}
+.rx h3{font-family:var(--serif);font-weight:400;font-size:1.3rem;margin:.3rem 0 .5rem}
+.rx p{font-size:.95rem}
+.rx ul{list-style:none;margin-top:.8rem;display:grid;gap:.45rem}
+.rx li{padding-left:1rem;position:relative;font-size:.9rem;color:#C3CAD9}
+.rx li::before{content:'';position:absolute;left:0;top:.62em;width:4px;height:4px;border-radius:50%;background:var(--c)}
+.relief{color:var(--muted);font-size:.88rem;margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--line-soft)}
+.flower{color:var(--muted);font-size:.88rem;margin-top:.9rem;padding-top:.9rem;border-top:1px solid var(--line-soft)}
+
+/* ── practitioner ───────────────────────── */
+.flag{border:1px solid var(--ember);background:rgba(255,77,94,.07);border-radius:3px;
+  padding:1rem 1.1rem;margin-bottom:1rem}
+.flag-h{font-family:var(--mono);font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--ember)}
+.flag p{font-size:.9rem;margin-top:.4rem}
+.flag q{color:#EDEFF5;font-family:var(--serif);font-style:italic}
+.clean{border:1px solid var(--leaf);background:rgba(111,217,124,.06);border-radius:3px;padding:1rem 1.1rem}
+.clean .flag-h{color:var(--leaf)}
+.raw{font-family:var(--mono);font-size:.72rem;color:var(--muted);background:var(--sunk);
+  border:1px solid var(--line-soft);padding:1rem;border-radius:3px;margin-top:1.4rem;
+  white-space:pre;overflow-x:auto}
+
+@media(prefers-reduced-motion:reduce){.view.on{animation:none}*{transition-duration:.01ms !important}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="home" id="homelink" href="index.html">Home</a>
+  <div class="mark" id="mark"></div>
+  <nav class="langs" aria-label="Language">
+    <button data-lang="en" aria-current="true">EN</button>
+    <button data-lang="de" aria-current="false">DE</button>
+    <button data-lang="hr" aria-current="false">HR</button>
+  </nav>
+  <span class="ver">v2 (a)</span>
+</header>
+
+<main>
+  <section class="view on" id="v-intro"></section>
+  <section class="view" id="v-q"></section>
+  <section class="view" id="v-mid"></section>
+  <section class="view" id="v-res"></section>
+  <section class="view" id="v-rx"></section>
+  <section class="view" id="v-prac"></section>
+</main>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   THE FOUR POWERS · BALANCE ASSESSMENT
+
+   Structure borrowed from three systems that independently agree:
+
+   AYURVEDA   Prakriti (constitution) vs Vikriti (current drift).
+              Two scores per power, never one. Part 1 asks how you
+              have always been; Part 2 asks about recent months.
+              Most quizzes collapse these and end up measuring only
+              this month's stress while claiming to read character.
+
+   JUNG       The four functions sit in two pairs of opposites. The
+              inferior function is always the opposite of the dominant,
+              is where the shadow erupts, and arrives raw under stress.
+
+   WU XING    The controlling cycle. You do not fight an excess; you
+              strengthen its controller. Water extinguishes fire.
+
+   The cards already encode the oppositions:
+     Ishwari (air, "too much in the air") <-> Saraswati (earth, all body)
+     Kali (fire, rage)                    <-> Lakshmi (water, forgiveness)
+   So the remedy engine treats a power's shadow with its OPPOSITE's
+   practices, and offers its own card only as symptomatic relief.
+   ═══════════════════════════════════════════════════════════════════ */
+
+const POWERS = [
+  {id:'ishwari',   c:'--pearl', opp:'saraswati'},
+  {id:'kali',      c:'--ember', opp:'lakshmi'},
+  {id:'lakshmi',   c:'--aqua',  opp:'kali'},
+  {id:'saraswati', c:'--leaf',  opp:'ishwari'}
+];
+const PI = {ishwari:0, kali:1, lakshmi:2, saraswati:3};
+
+/* Items. n = nature (Prakriti), s = shadow (Vikriti).
+   crit marks items that are surfaced to the practitioner regardless
+   of the total, the way PHQ-9 handles item 9. They score normally. */
+const ITEMS = [
+  // ── nature ──
+  {p:'ishwari',  d:'n', k:'i_n1'}, {p:'ishwari',  d:'n', k:'i_n2'},
+  {p:'ishwari',  d:'n', k:'i_n3'}, {p:'ishwari',  d:'n', k:'i_n4'},
+  {p:'ishwari',  d:'n', k:'i_n5'},
+  {p:'kali',     d:'n', k:'k_n1'}, {p:'kali',     d:'n', k:'k_n2'},
+  {p:'kali',     d:'n', k:'k_n3'}, {p:'kali',     d:'n', k:'k_n4'},
+  {p:'kali',     d:'n', k:'k_n5'},
+  {p:'lakshmi',  d:'n', k:'l_n1'}, {p:'lakshmi',  d:'n', k:'l_n2'},
+  {p:'lakshmi',  d:'n', k:'l_n3'}, {p:'lakshmi',  d:'n', k:'l_n4'},
+  {p:'lakshmi',  d:'n', k:'l_n5'},
+  {p:'saraswati',d:'n', k:'s_n1'}, {p:'saraswati',d:'n', k:'s_n2'},
+  {p:'saraswati',d:'n', k:'s_n3'}, {p:'saraswati',d:'n', k:'s_n4'},
+  {p:'saraswati',d:'n', k:'s_n5'},
+  // ── shadow ──
+  {p:'ishwari',  d:'s', k:'i_s1'}, {p:'ishwari',  d:'s', k:'i_s2'},
+  {p:'ishwari',  d:'s', k:'i_s3'}, {p:'ishwari',  d:'s', k:'i_s4'},
+  {p:'ishwari',  d:'s', k:'i_s5'},
+  {p:'kali',     d:'s', k:'k_s1', crit:'rage'},
+  {p:'kali',     d:'s', k:'k_s2'},
+  {p:'kali',     d:'s', k:'k_s3', crit:'force'},
+  {p:'kali',     d:'s', k:'k_s4'}, {p:'kali',     d:'s', k:'k_s5'},
+  {p:'lakshmi',  d:'s', k:'l_s1'}, {p:'lakshmi',  d:'s', k:'l_s2'},
+  {p:'lakshmi',  d:'s', k:'l_s3'},
+  {p:'lakshmi',  d:'s', k:'l_s4', crit:'subst'},
+  {p:'lakshmi',  d:'s', k:'l_s5', crit:'self'},
+  {p:'saraswati',d:'s', k:'s_s1'}, {p:'saraswati',d:'s', k:'s_s2'},
+  {p:'saraswati',d:'s', k:'s_s3'}, {p:'saraswati',d:'s', k:'s_s4'},
+  {p:'saraswati',d:'s', k:'s_s5', crit:'eat'}
+];
+
+/* Interleave so no two consecutive items share a power. Fixed, not
+   random, so a client's run is reproducible and Kerstin can compare
+   two sittings item by item. Questions never reveal which power they
+   belong to; a visible label would invite strategic answering. */
+function order(dim){
+  const byP = POWERS.map(p => ITEMS.filter(i => i.p===p.id && i.d===dim));
+  const out = [];
+  for (let r=0; r<5; r++) for (let c=0; c<4; c++) out.push(byP[(c+r)%4][r]);
+  return out;
+}
+const SEQ = [...order('n'), ...order('s')];
+
+const T = {
+
+/* ════════════════════ ENGLISH ════════════════════ */
+en:{
+  mark:"Four Powers · Balance Assessment",
+  title:"Where are your<br>four powers?",
+  lede:"Forty questions, about eight minutes. It reads each of the four powers twice: as your nature, and as the load it is carrying now.",
+  begin:"Begin", back:"Back", next:"Continue", again:"Start over",
+  seeRes:"See the reading", seeRx:"Remedy", seePrac:"Practitioner notes", backRes:"Back to the reading",
+  scale:["Never","Rarely","Sometimes","Often","Always"],
+  frameN:"How I have always been", frameS:"In recent months",
+  ofN:"of 40",
+
+  method:[
+    ["Two scores, not one","Ayurveda separates Prakriti, the constitution you were born with, from Vikriti, the drift that stress and circumstance produce. Most quizzes collapse the two and end up measuring this month rather than your nature. Part one asks how you have always been. Part two asks about recent months."],
+    ["Opposites","Jung held that the four functions sit in two pairs, and that the inferior function is always the opposite of the dominant one. It is where the shadow erupts, and it arrives raw because it was never trained."],
+    ["Control, not combat","Chinese medicine treats an excess by strengthening what restrains it, not by attacking it. Water extinguishes fire. The remedy engine here follows that rule."]
+  ],
+  introNote:"<b>What this is.</b> A structured reading, not a medical or psychological diagnosis. It is designed to be worked through with a facilitator rather than alone, and it says nothing that a careful conversation could not also reach. Nothing you enter leaves this page.",
+
+  midTitle:"Part two",
+  midLede:"That was your nature: the shape you have had for as long as you can remember. Now the present. Answer these for the last few months only, not for your life. The gap between the two is where the reading lives.",
+
+  resTitle:"The reading",
+  natureL:"Nature", shadowL:"Load",
+  states:{
+    clear:"In front, clear", distorted:"In front, distorted",
+    quiet:"Behind, quiet", bleeding:"Behind, bleeding"
+  },
+  dominant:"Nature seats you in", inferior:"Least developed", loaded:"Carrying most",
+  axisJung:"Your least developed power is the opposite of your strongest. That is the classical pattern: the gift and the wound are one axis.",
+  axisOff:"Your least developed power is not the opposite of your strongest, which is less usual. Two powers are quiet at once rather than one being pushed under by another.",
+  flat:"<b>Your answers were nearly all the same.</b> That tells us almost nothing, so treat everything below as unreliable. Either the questions did not land, or the honest answer is that you have not looked. Worth doing again slowly, or with Kerstin in the room.",
+
+  rxTitle:"What would move it",
+  rxOpp:"The structural move", rxOwn:"Symptomatic relief",
+  rxIntro:"Your heaviest load is in {P}. The instinct is to treat it with its own practices. That is the one thing that will not work, because those practices are made of the same substance as the trouble.",
+  rxBalanced:"No power is carrying a heavy load right now. That is uncommon and worth noticing rather than improving. Sri Aurobindo's own counsel, when asked which aspects to keep in front, was Saraswati and Ishwari. Keep them working and the other two stay available.",
+  rxDefault:"Sri Aurobindo, asked which aspects to keep in front, named Saraswati and Ishwari, and said that was how he had worked himself. Whatever else you do, keep those two in motion.",
+  homelink:"Home",
+  rxFlower:"The flower", rxFlowerLead:"Free, and the gentlest of all. The Mother's bloom for the power you are reaching toward:",
+
+  pracTitle:"Practitioner notes",
+  pracLede:"For the facilitator. The client does not see this screen.",
+  pracClean:"No critical items raised. Scores below can be read at face value.",
+  pracFlag:"Critical items raised",
+  pracWhy:"These items score into their power like any other. They are surfaced separately because a remedy list is the wrong answer to them, and because the total can look unremarkable while one of these sits at the top of the scale.",
+  crit:{
+    rage:["Anger outrunning judgment","Answered at the top of the scale. Before any Kali remedy, establish whether anyone is currently unsafe, including the client."],
+    force:["Force where patience would do","Answered at the top of the scale. Worth knowing who is on the receiving end before this is framed as a power to be refined."],
+    subst:["Reaching for something to take the edge off","Answered at the top of the scale. Do not hand this client a practice as a substitute. Ask what the something is."],
+    self:["Finding little in themselves to like","Answered at the top of the scale. This is the item that most often sits underneath the others. Ask directly about it, and about how long."],
+    eat:["Eating that does not feel theirs to command","Answered at the top of the scale. Saraswati's card recommends food, sports and healthy habits. Do not use it here. That advice makes this worse."]
+  },
+  pracRefer:"Any of the above at the top of the scale means the honest next step may be outside your room. That is not a failure of the method. It is the method working.",
+  raw:"Raw scores"
+},
+
+/* ════════════════════ DEUTSCH ════════════════════ */
+de:{
+  mark:"Vier Kräfte · Gleichgewichts-Erhebung",
+  title:"Wo stehen deine<br>vier Kräfte?",
+  lede:"Vierzig Fragen, etwa acht Minuten. Jede der vier Kräfte wird zweimal gelesen: als deine Natur, und als die Last, die sie gerade trägt.",
+  begin:"Beginnen", back:"Zurück", next:"Weiter", again:"Neu starten",
+  seeRes:"Zur Auswertung", seeRx:"Heilmittel", seePrac:"Notizen für die Begleitung", backRes:"Zurück zur Auswertung",
+  scale:["Nie","Selten","Manchmal","Oft","Immer"],
+  frameN:"Wie ich immer schon war", frameS:"In den letzten Monaten",
+  ofN:"von 40",
+
+  method:[
+    ["Zwei Werte, nicht einer","Ayurveda trennt Prakriti, die Konstitution, mit der du geboren wurdest, von Vikriti, der Abweichung, die Stress und Umstände erzeugen. Die meisten Tests werfen beides zusammen und messen dann diesen Monat statt deiner Natur. Teil eins fragt, wie du immer schon warst. Teil zwei fragt nach den letzten Monaten."],
+    ["Gegensätze","Jung hielt fest, dass die vier Funktionen in zwei Paaren stehen und die minderwertige Funktion immer der dominanten gegenüberliegt. Dort bricht der Schatten hervor, und er kommt roh, weil diese Funktion nie geschult wurde."],
+    ["Kontrolle statt Kampf","Die chinesische Medizin behandelt ein Zuviel, indem sie stärkt, was es bändigt, nicht indem sie es angreift. Wasser löscht Feuer. Die Heilmittel-Logik hier folgt dieser Regel."]
+  ],
+  introNote:"<b>Was das ist.</b> Eine strukturierte Lesart, keine medizinische oder psychologische Diagnose. Sie ist dafür gemacht, mit einer Begleitung durchgegangen zu werden, nicht allein, und sie sagt nichts, was ein sorgfältiges Gespräch nicht auch erreichen könnte. Nichts, was du eingibst, verlässt diese Seite.",
+
+  midTitle:"Teil zwei",
+  midLede:"Das war deine Natur: die Gestalt, die du hast, solange du denken kannst. Nun die Gegenwart. Beantworte das Folgende nur für die letzten Monate, nicht für dein Leben. Im Abstand zwischen beiden liegt die Auswertung.",
+
+  resTitle:"Die Auswertung",
+  natureL:"Natur", shadowL:"Last",
+  states:{
+    clear:"Vorne, klar", distorted:"Vorne, verzerrt",
+    quiet:"Dahinter, still", bleeding:"Dahinter, blutend"
+  },
+  dominant:"Deine Natur sitzt in", inferior:"Am wenigsten entwickelt", loaded:"Trägt am meisten",
+  axisJung:"Deine am wenigsten entwickelte Kraft ist der Gegenpol deiner stärksten. Das ist das klassische Muster: Gabe und Wunde liegen auf einer Achse.",
+  axisOff:"Deine am wenigsten entwickelte Kraft ist nicht der Gegenpol deiner stärksten, was seltener vorkommt. Zwei Kräfte sind zugleich still, statt dass eine die andere niederhält.",
+  flat:"<b>Deine Antworten waren fast alle gleich.</b> Das sagt so gut wie nichts, also gilt alles Folgende als unzuverlässig. Entweder haben die Fragen nicht getroffen, oder die ehrliche Antwort lautet, dass du nicht hingesehen hast. Lohnt sich langsam zu wiederholen, oder mit Kerstin im Raum.",
+
+  rxTitle:"Was es bewegen würde",
+  rxOpp:"Der strukturelle Zug", rxOwn:"Symptomatische Linderung",
+  rxIntro:"Deine schwerste Last liegt bei {P}. Der Reflex ist, sie mit ihren eigenen Praktiken zu behandeln. Genau das wird nicht wirken, denn diese Praktiken bestehen aus demselben Stoff wie die Schwierigkeit.",
+  rxBalanced:"Keine Kraft trägt gerade eine schwere Last. Das ist ungewöhnlich und eher zu bemerken als zu verbessern. Sri Aurobindos eigener Rat, gefragt, welche Aspekte vorne zu halten seien, lautete Saraswati und Ishwari. Halte diese beiden am Werk, und die anderen zwei bleiben verfügbar.",
+  rxDefault:"Sri Aurobindo nannte, gefragt, welche Aspekte man vorne halten solle, Saraswati und Ishwari, und sagte, so habe er selbst gearbeitet. Was du sonst tust: halte diese beiden in Bewegung.",
+  homelink:"Start",
+  rxFlower:"Die Blume", rxFlowerLead:"Frei, und die sanfteste von allen. Die Blüte der Mutter für die Kraft, zu der du greifst:",
+
+  pracTitle:"Notizen für die Begleitung",
+  pracLede:"Für die begleitende Person. Die Klientin sieht diesen Bildschirm nicht.",
+  pracClean:"Keine kritischen Punkte aufgetreten. Die Werte unten sind so lesbar, wie sie dastehen.",
+  pracFlag:"Kritische Punkte aufgetreten",
+  pracWhy:"Diese Punkte fließen wie alle anderen in ihre Kraft ein. Sie werden gesondert gezeigt, weil eine Heilmittelliste die falsche Antwort auf sie ist, und weil die Gesamtwertung unauffällig aussehen kann, während einer davon am oberen Ende der Skala steht.",
+  crit:{
+    rage:["Zorn schneller als das Urteil","Am oberen Ende beantwortet. Vor jedem Kali-Heilmittel klären, ob gerade jemand nicht sicher ist, die Klientin eingeschlossen."],
+    force:["Kraft, wo Geduld gereicht hätte","Am oberen Ende beantwortet. Es lohnt zu wissen, wer das abbekommt, bevor dies als zu verfeinernde Kraft gerahmt wird."],
+    subst:["Nach etwas greifen, das die Kante nimmt","Am oberen Ende beantwortet. Dieser Klientin keine Praxis als Ersatz reichen. Frage, was das Etwas ist."],
+    self:["Wenig an sich selbst zu mögen finden","Am oberen Ende beantwortet. Dieser Punkt liegt am häufigsten unter allen anderen. Direkt danach fragen, und seit wann."],
+    eat:["Essen, das sich nicht steuerbar anfühlt","Am oberen Ende beantwortet. Saraswatis Karte empfiehlt Ernährung, Sport und gesunde Gewohnheiten. Hier nicht verwenden. Dieser Rat verschlimmert das."]
+  },
+  pracRefer:"Steht einer der obigen Punkte am oberen Ende der Skala, kann der ehrliche nächste Schritt außerhalb deines Raumes liegen. Das ist kein Versagen der Methode. Das ist die Methode bei der Arbeit.",
+  raw:"Rohwerte"
+},
+
+/* ════════════════════ HRVATSKI ════════════════════ */
+hr:{
+  mark:"Četiri moći · Procjena ravnoteže",
+  title:"Gdje stoje tvoje<br>četiri moći?",
+  lede:"Četrdeset pitanja, otprilike osam minuta. Svaka se od četiri moći čita dvaput: kao tvoja narav, i kao teret koji trenutno nosi.",
+  begin:"Počni", back:"Natrag", next:"Dalje", again:"Kreni ispočetka",
+  seeRes:"Na očitanje", seeRx:"Lijek", seePrac:"Bilješke za voditelja", backRes:"Natrag na očitanje",
+  scale:["Nikad","Rijetko","Ponekad","Često","Uvijek"],
+  frameN:"Kakav sam oduvijek", frameS:"U zadnjih nekoliko mjeseci",
+  ofN:"od 40",
+
+  method:[
+    ["Dva broja, ne jedan","Ayurveda razdvaja Prakriti, konstituciju s kojom si rođen, od Vikriti, otklona koji stvaraju stres i okolnosti. Većina testova to dvoje stopi i onda mjeri ovaj mjesec umjesto tvoje naravi. Prvi dio pita kakav si oduvijek. Drugi dio pita za zadnjih nekoliko mjeseci."],
+    ["Suprotnosti","Jung je držao da četiri funkcije stoje u dva para i da je inferiorna funkcija uvijek suprotna dominantnoj. Ondje sjena provaljuje, i dolazi sirova jer ta funkcija nikad nije uvježbana."],
+    ["Kontrola, ne borba","Kineska medicina liječi višak tako da ojača ono što ga obuzdava, a ne napadom na njega. Voda gasi vatru. Logika lijeka ovdje slijedi to pravilo."]
+  ],
+  introNote:"<b>Što je ovo.</b> Strukturirano očitanje, ne medicinska ni psihološka dijagnoza. Napravljeno je da se prolazi uz voditelja, a ne samo, i ne govori ništa do čega pažljiv razgovor ne bi također došao. Ništa što upišeš ne napušta ovu stranicu.",
+
+  midTitle:"Drugi dio",
+  midLede:"To je bila tvoja narav: oblik koji imaš otkad znaš za sebe. Sad sadašnjost. Na ovo odgovaraj samo za zadnjih nekoliko mjeseci, ne za cijeli život. U razmaku između to dvoje leži očitanje.",
+
+  resTitle:"Očitanje",
+  natureL:"Narav", shadowL:"Teret",
+  states:{
+    clear:"Sprijeda, čisto", distorted:"Sprijeda, izobličeno",
+    quiet:"Iza, tiho", bleeding:"Iza, krvari"
+  },
+  dominant:"Narav te smješta u", inferior:"Najmanje razvijeno", loaded:"Nosi najviše",
+  axisJung:"Tvoja najmanje razvijena moć suprotna je tvojoj najjačoj. To je klasičan obrazac: dar i rana leže na istoj osi.",
+  axisOff:"Tvoja najmanje razvijena moć nije suprotna tvojoj najjačoj, što je rjeđe. Dvije su moći tihe istodobno, umjesto da jedna drugu potiskuje.",
+  flat:"<b>Odgovori su ti bili gotovo svi isti.</b> To ne govori gotovo ništa, pa sve niže smatraj nepouzdanim. Ili pitanja nisu pogodila, ili je iskren odgovor da nisi pogledao. Vrijedi ponoviti polako, ili s Kerstin u prostoriji.",
+
+  rxTitle:"Što bi to pomaknulo",
+  rxOpp:"Strukturalni potez", rxOwn:"Simptomatsko olakšanje",
+  rxIntro:"Tvoj najteži teret je u {P}. Nagon je liječiti ga njezinim vlastitim praksama. Upravo to neće djelovati, jer su te prakse od iste tvari kao i nevolja.",
+  rxBalanced:"Nijedna moć trenutno ne nosi težak teret. To je neuobičajeno i vrijedi to primijetiti, a ne popravljati. Vlastiti savjet Sri Aurobinda, kad su ga pitali koje aspekte držati sprijeda, bio je Saraswati i Ishwari. Drži njih dvije u radu i druge dvije ostaju dostupne.",
+  rxDefault:"Sri Aurobindo je, upitan koje aspekte držati sprijeda, imenovao Saraswati i Ishwari, i rekao da je tako i sam radio. Što god drugo radio, drži to dvoje u pokretu.",
+  homelink:"Početak",
+  rxFlower:"Cvijet", rxFlowerLead:"Slobodan, i najnježniji od svih. Majčin cvijet za moć kojoj se okrećeš:",
+
+  pracTitle:"Bilješke za voditelja",
+  pracLede:"Za osobu koja vodi. Klijent ne vidi ovaj zaslon.",
+  pracClean:"Nijedna kritična stavka nije se javila. Vrijednosti niže čitaju se onako kako stoje.",
+  pracFlag:"Javile su se kritične stavke",
+  pracWhy:"Ove stavke ulaze u svoju moć kao i sve ostale. Prikazane su odvojeno jer je popis lijekova pogrešan odgovor na njih, i jer ukupni rezultat može izgledati neupadljivo dok jedna od njih stoji na vrhu ljestvice.",
+  crit:{
+    rage:["Ljutnja brža od prosudbe","Odgovoreno na vrhu ljestvice. Prije bilo kakvog Kalinog lijeka utvrdi je li itko trenutno nesiguran, uključujući klijenta."],
+    force:["Sila ondje gdje bi strpljenje bilo dovoljno","Odgovoreno na vrhu ljestvice. Vrijedi znati tko to prima prije nego se ovo uokviri kao moć koju treba profiniti."],
+    subst:["Posezanje za nečim što skida oštricu","Odgovoreno na vrhu ljestvice. Ovom klijentu ne davati praksu kao zamjenu. Pitaj što je to nešto."],
+    self:["Malo toga na sebi za voljeti","Odgovoreno na vrhu ljestvice. Ova stavka najčešće leži ispod svih ostalih. Pitaj izravno o njoj, i koliko dugo traje."],
+    eat:["Jedenje koje se ne čini vlastitim","Odgovoreno na vrhu ljestvice. Saraswatina kartica preporučuje hranu, sport i zdrave navike. Ovdje ih ne koristi. Taj savjet ovo pogoršava."]
+  },
+  pracRefer:"Ako je bilo koja od gornjih stavki na vrhu ljestvice, iskren sljedeći korak možda je izvan tvoje prostorije. To nije neuspjeh metode. To je metoda koja radi.",
+  raw:"Sirove vrijednosti"
+}
+};
+
+/* ── the items, per language ─────────────────────────────────────── */
+const Q = {
+en:{
+ i_n1:"I see the whole shape of a situation before I see the details.",
+ i_n2:"I need to understand why something is true before I will act on it.",
+ i_n3:"People come to me for perspective rather than for sympathy.",
+ i_n4:"I stay calm while the people around me are reacting.",
+ i_n5:"I would rather be alone with a large question than in company with a small one.",
+ k_n1:"When something needs doing, I move now and correct later.",
+ k_n2:"I lose patience with half measures.",
+ k_n3:"I can put out more force than people expect of me.",
+ k_n4:"An obstacle makes me want to go through rather than around.",
+ k_n5:"When I care about something, I care at full intensity.",
+ l_n1:"I notice the moment the mood in a room changes.",
+ l_n2:"Beauty around me affects how I feel more than people would guess.",
+ l_n3:"I want the people near me to be at ease with each other.",
+ l_n4:"I feel what someone feels almost before they say it.",
+ l_n5:"Something in me needs the thing to be lovely, not only correct.",
+ s_n1:"I finish what I start, down to the last detail.",
+ s_n2:"I would rather do it properly and slowly than fast and roughly.",
+ s_n3:"I am the one who notices the thing everyone else missed.",
+ s_n4:"I like knowing the right order to do things in.",
+ s_n5:"I trust what I can make with my hands.",
+ i_s1:"I have argued in my head with someone who was not in the room.",
+ i_s2:"I have decided what someone is like before they finished speaking.",
+ i_s3:"I have kept analysing long past the point where it helped.",
+ i_s4:"I have felt above the situation I was actually standing in.",
+ i_s5:"I have been certain I was right and found the certainty hard to put down.",
+ k_s1:"My anger has arrived faster than my judgment.",
+ k_s2:"Being right has mattered more than the thing I was trying to do.",
+ k_s3:"I have used force, in tone or in will, where patience would have worked.",
+ k_s4:"I have made something loud that had little inside it.",
+ k_s5:"Afterwards I have been surprised by how much heat I put into it.",
+ l_s1:"I have kept count of what I gave and what came back.",
+ l_s2:"I have hidden what I felt rather than let it be seen.",
+ l_s3:"I have said yes because saying no felt unsafe.",
+ l_s4:"I have reached for something to take the edge off.",
+ l_s5:"I have found little in myself to like.",
+ s_s1:"I have kept following a rule I no longer believe in.",
+ s_s2:"I have been too heavy to start the thing I meant to start.",
+ s_s3:"My body has been the last thing I attended to.",
+ s_s4:"I have worked past the point where the work was any good.",
+ s_s5:"My eating has not felt like mine to command."
+},
+de:{
+ i_n1:"Ich sehe die ganze Gestalt einer Lage, bevor ich die Einzelheiten sehe.",
+ i_n2:"Ich muss verstehen, warum etwas wahr ist, bevor ich danach handle.",
+ i_n3:"Menschen kommen zu mir für Überblick, nicht für Mitgefühl.",
+ i_n4:"Ich bleibe ruhig, während die Menschen um mich herum reagieren.",
+ i_n5:"Ich bin lieber allein mit einer großen Frage als in Gesellschaft mit einer kleinen.",
+ k_n1:"Wenn etwas getan werden muss, handle ich jetzt und korrigiere später.",
+ k_n2:"Mit halben Sachen verliere ich die Geduld.",
+ k_n3:"Ich kann mehr Kraft aufbringen, als man mir zutraut.",
+ k_n4:"Ein Hindernis lässt mich hindurch wollen statt herum.",
+ k_n5:"Wenn mir etwas wichtig ist, ist es mir mit voller Intensität wichtig.",
+ l_n1:"Ich merke den Moment, in dem die Stimmung im Raum kippt.",
+ l_n2:"Schönheit um mich herum wirkt stärker auf mich, als man vermuten würde.",
+ l_n3:"Ich möchte, dass die Menschen um mich herum miteinander im Reinen sind.",
+ l_n4:"Ich spüre, was jemand fühlt, fast bevor er es sagt.",
+ l_n5:"Etwas in mir braucht, dass es schön ist, nicht nur richtig.",
+ s_n1:"Ich bringe zu Ende, was ich anfange, bis ins letzte Detail.",
+ s_n2:"Lieber ordentlich und langsam als schnell und grob.",
+ s_n3:"Ich bin die, der auffällt, was alle anderen übersehen haben.",
+ s_n4:"Ich mag es, die richtige Reihenfolge zu kennen.",
+ s_n5:"Ich vertraue dem, was ich mit meinen Händen machen kann.",
+ i_s1:"Ich habe im Kopf mit jemandem gestritten, der nicht im Raum war.",
+ i_s2:"Ich habe entschieden, wie jemand ist, bevor er ausgeredet hatte.",
+ i_s3:"Ich habe weiter analysiert, lange nachdem es nichts mehr brachte.",
+ i_s4:"Ich habe mich über der Lage gefühlt, in der ich tatsächlich stand.",
+ i_s5:"Ich war sicher, im Recht zu sein, und kam von der Gewissheit schwer los.",
+ k_s1:"Mein Zorn war schneller da als mein Urteil.",
+ k_s2:"Rechthaben war mir wichtiger als das, was ich eigentlich vorhatte.",
+ k_s3:"Ich habe Kraft eingesetzt, im Ton oder im Willen, wo Geduld gereicht hätte.",
+ k_s4:"Ich habe etwas Lautes gemacht, in dem wenig drin war.",
+ k_s5:"Hinterher war ich überrascht, wie viel Hitze ich hineingelegt hatte.",
+ l_s1:"Ich habe mitgezählt, was ich gegeben habe und was zurückkam.",
+ l_s2:"Ich habe verborgen, was ich fühlte, statt es zeigen zu lassen.",
+ l_s3:"Ich habe ja gesagt, weil nein zu sagen sich unsicher anfühlte.",
+ l_s4:"Ich habe nach etwas gegriffen, das die Kante nimmt.",
+ l_s5:"Ich habe wenig an mir gefunden, das ich mag.",
+ s_s1:"Ich bin einer Regel weiter gefolgt, an die ich nicht mehr glaube.",
+ s_s2:"Ich war zu schwer, um anzufangen, was ich anfangen wollte.",
+ s_s3:"Mein Körper kam als Letztes dran.",
+ s_s4:"Ich habe weitergearbeitet, lange nachdem die Arbeit noch gut war.",
+ s_s5:"Mein Essen hat sich nicht angefühlt, als hätte ich es in der Hand."
+},
+hr:{
+ i_n1:"Vidim cijeli oblik situacije prije nego vidim pojedinosti.",
+ i_n2:"Moram razumjeti zašto je nešto istina prije nego po tome postupim.",
+ i_n3:"Ljudi mi dolaze po perspektivu, a ne po suosjećanje.",
+ i_n4:"Ostajem miran dok ljudi oko mene reagiraju.",
+ i_n5:"Radije sam sam s velikim pitanjem nego u društvu s malim.",
+ k_n1:"Kad nešto treba učiniti, krenem odmah pa ispravljam poslije.",
+ k_n2:"S polovičnim rješenjima gubim strpljenje.",
+ k_n3:"Mogu izbaciti više sile nego što ljudi od mene očekuju.",
+ k_n4:"Prepreka me tjera da idem kroz, a ne okolo.",
+ k_n5:"Kad mi je do nečega stalo, stalo mi je punim intenzitetom.",
+ l_n1:"Primijetim trenutak kad se raspoloženje u prostoriji promijeni.",
+ l_n2:"Ljepota oko mene djeluje na mene jače nego što bi tko pretpostavio.",
+ l_n3:"Želim da ljudi oko mene budu opušteni jedni s drugima.",
+ l_n4:"Osjetim što netko osjeća gotovo prije nego to izgovori.",
+ l_n5:"Nešto u meni treba da bude lijepo, a ne samo ispravno.",
+ s_n1:"Dovršim što započnem, do zadnjeg detalja.",
+ s_n2:"Radije kako treba i polako nego brzo i grubo.",
+ s_n3:"Ja sam taj koji primijeti ono što su svi drugi promašili.",
+ s_n4:"Volim znati pravi redoslijed stvari.",
+ s_n5:"Vjerujem onome što mogu napraviti svojim rukama.",
+ i_s1:"Raspravljao sam u glavi s nekim tko nije bio u sobi.",
+ i_s2:"Odlučio sam kakav je netko prije nego je dovršio rečenicu.",
+ i_s3:"Nastavio sam analizirati dugo nakon što je to prestalo pomagati.",
+ i_s4:"Osjećao sam se iznad situacije u kojoj sam zapravo stajao.",
+ i_s5:"Bio sam siguran da sam u pravu i teško sam pustio tu sigurnost.",
+ k_s1:"Ljutnja mi je stigla brže od prosudbe.",
+ k_s2:"Bilo mi je važnije da sam u pravu nego ono što sam htio postići.",
+ k_s3:"Upotrijebio sam silu, u tonu ili u volji, ondje gdje bi strpljenje upalilo.",
+ k_s4:"Napravio sam nešto glasno u čemu je bilo malo toga.",
+ k_s5:"Poslije sam se iznenadio koliko sam vrućine u to uložio.",
+ l_s1:"Vodio sam račun o tome što sam dao i što se vratilo.",
+ l_s2:"Skrivao sam što osjećam umjesto da to pustim da se vidi.",
+ l_s3:"Pristao sam jer mi se odbiti činilo nesigurnim.",
+ l_s4:"Posegnuo sam za nečim što skida oštricu.",
+ l_s5:"Našao sam malo toga na sebi što volim.",
+ s_s1:"Nastavio sam slijediti pravilo u koje više ne vjerujem.",
+ s_s2:"Bio sam pretežak da započnem ono što sam namjeravao.",
+ s_s3:"Moje tijelo bilo je zadnje čemu sam posvetio pažnju.",
+ s_s4:"Radio sam dugo nakon što je rad još bio dobar.",
+ s_s5:"Moje jedenje nije se činilo kao nešto čime ja upravljam."
+}
+};
+
+/* ── power names, elements, state readings, remedies ─────────────── */
+/* the Mother's flower for each power, offered in the remedy as the free
+   practice. keyed by power; the remedy shows the OPPOSITE power's flower,
+   the one being reached toward. two she named for the aspects herself,
+   two (ishwari, kali) are matched by attribute. */
+const FLOWERS = {
+ en:{
+  ishwari:{name:"Siris tree",latin:"Albizia lebbeck",line:"Integral wisdom. Sit with it when you need the wide calm back."},
+  kali:{name:"Chinese hibiscus",latin:"Hibiscus rosa-sinensis",line:"Agni, controlled power. The fire that carries without consuming."},
+  lakshmi:{name:"Water lily",latin:"Nymphaea",line:"The integral wealth of Mahalakshmi. Rooted in the depth, flowering at the surface."},
+  saraswati:{name:"Rondeletia",latin:"Rondeletia odorata",line:"Perfection in works. The Mother's whole comment: is not satisfied with makeshift."}
+ },
+ de:{
+  ishwari:{name:"Siris-Baum",latin:"Albizia lebbeck",line:"Integrale Weisheit. Sitz mit ihr, wenn du die weite Ruhe zurückbrauchst."},
+  kali:{name:"Chinesischer Hibiskus",latin:"Hibiscus rosa-sinensis",line:"Agni, beherrschte Kraft. Das Feuer, das trägt, ohne zu verzehren."},
+  lakshmi:{name:"Seerose",latin:"Nymphaea",line:"Der integrale Reichtum Mahalakshmis. In der Tiefe verwurzelt, an der Oberfläche blühend."},
+  saraswati:{name:"Rondeletia",latin:"Rondeletia odorata",line:"Vollkommenheit im Werk. Der ganze Kommentar der Mutter: ist mit Behelfslösungen nicht zufrieden."}
+ },
+ hr:{
+  ishwari:{name:"Stablo sirisa",latin:"Albizia lebbeck",line:"Integralna mudrost. Sjedni s njim kad ti treba širok mir natrag."},
+  kali:{name:"Kineski hibiskus",latin:"Hibiscus rosa-sinensis",line:"Agni, obuzdana moć. Vatra koja nosi ne proždirući."},
+  lakshmi:{name:"Lopoč",latin:"Nymphaea",line:"Integralno bogatstvo Mahalakshmi. Ukorijenjen u dubini, cvjeta na površini."},
+  saraswati:{name:"Rondeletia",latin:"Rondeletia odorata",line:"Savršenstvo u radu. Cijeli komentar Majke: nije zadovoljna provizorijem."}
+ }
+};
+
+const P = {
+en:{
+ ishwari:{n:"Ishwari",el:"Air",att:"Wisdom",
+  clear:"Wideness is available and it is costing no one anything. You can see the whole and still meet what is in front of you. Perspective without distance.",
+  distorted:"The reach is genuinely yours, and right now it has closed around a position. The mind that could hold the whole has picked one frame and called it the truth. The gift and the trouble are the same faculty.",
+  quiet:"Not your seat, and not currently a problem. Wideness is there when you send for it, but you do not live in it. Nothing here needs fixing.",
+  bleeding:"Not your ground, and where you are getting hit. Certainty, judgment and analysis arrive with a force out of proportion to you, because they arrive from a part that was never trained."},
+ kali:{n:"Kali",el:"Fire",att:"Strength",
+  clear:"Force is available and aimed. You move when moving is what the moment needs, and you are not burning anyone to do it. The rarest of the four to hold cleanly.",
+  distorted:"The intensity is real and it has lost its aim. Force without direction is rage, force without consent is overpowering, force without patience is my way or the highway. The engine is fine. The steering is not.",
+  quiet:"Not your seat and not troubling you. You are unlikely to shatter an obstacle, and equally unlikely to shatter a person. Sri Aurobindo thought few could carry her anyway.",
+  bleeding:"Force is not your ground, so when it comes it comes raw. Anger you did not author, heat out of nowhere, surprise at yourself afterwards. Untrained fire does not arrive politely."},
+ lakshmi:{n:"Lakshmi",el:"Water",att:"Harmony",
+  clear:"Harmony is available and it is not costing you. You feel the room without drowning in it, and you want beauty without needing it to be perfect. The easiest of the four to reach and the hardest to keep.",
+  distorted:"The sensitivity is real and it has turned back on you. Dammed, water stagnates into shame and score-keeping. Unbanked, it floods. Both are the same gift with nowhere to go.",
+  quiet:"Not your seat, and quiet with it. You are not swept off by feeling, though you may miss what a room is telling you. Nothing here is urgent.",
+  bleeding:"Feeling is not your ground and it is where you are bleeding. What you cannot name still moves you, and it moves you from underneath. She does not fight for her place. She veils her face and waits."},
+ saraswati:{n:"Saraswati",el:"Earth",att:"Perfection",
+  clear:"Craft is available and the body is with you. You hold detail without the detail holding you, and the process still has a reason inside it. Everything else you do leans on this.",
+  distorted:"The competence is real and it has become procedure. You keep the form and have lost the reason. Her own gift forged: right process counterfeited as mere process, and the body paying for it.",
+  quiet:"Not your seat and not currently a burden. Detail is not where you live, but nothing is seizing up. Worth watching rather than treating.",
+  bleeding:"The ground is not your ground. Heaviness, stalling, a body attended to last. She is the youngest and nearest of the four, and when she is absent everything else has nowhere to land."}
+},
+de:{
+ ishwari:{n:"Ishwari",el:"Luft",att:"Weisheit",
+  clear:"Weite ist verfügbar und kostet niemanden etwas. Du siehst das Ganze und begegnest trotzdem dem, was vor dir steht. Überblick ohne Ferne.",
+  distorted:"Die Reichweite gehört wirklich dir, und gerade hat sie sich um eine Position geschlossen. Der Geist, der das Ganze halten könnte, hat einen Rahmen gegriffen und ihn Wahrheit genannt. Gabe und Schwierigkeit sind dieselbe Fähigkeit.",
+  quiet:"Nicht dein Sitz, und derzeit kein Problem. Weite ist da, wenn du nach ihr schickst, aber du wohnst nicht darin. Hier ist nichts zu richten.",
+  bleeding:"Nicht dein Boden, und dort trifft es dich. Gewissheit, Urteil und Grübeln kommen mit einer Wucht, die nicht zu dir passt, weil sie aus einem Teil kommen, der nie geschult wurde."},
+ kali:{n:"Kali",el:"Feuer",att:"Stärke",
+  clear:"Kraft ist verfügbar und gerichtet. Du bewegst dich, wenn Bewegung gefragt ist, und verbrennst dabei niemanden. Von den Vieren am schwersten sauber zu halten.",
+  distorted:"Die Intensität ist echt und hat ihr Ziel verloren. Kraft ohne Richtung ist Wut, Kraft ohne Einverständnis ist Überwältigung, Kraft ohne Geduld ist mein Weg oder gar nicht. Der Motor ist in Ordnung. Die Lenkung nicht.",
+  quiet:"Nicht dein Sitz und keine Last. Du wirst kaum ein Hindernis zerschmettern, und ebenso wenig einen Menschen. Sri Aurobindo meinte ohnehin, nur wenige könnten sie tragen.",
+  bleeding:"Kraft ist nicht dein Boden, also kommt sie roh. Zorn, den du nicht verfasst hast, Hitze aus dem Nichts, hinterher Überraschung über dich selbst. Ungeschultes Feuer klopft nicht an."},
+ lakshmi:{n:"Lakshmi",el:"Wasser",att:"Harmonie",
+  clear:"Harmonie ist verfügbar und kostet dich nichts. Du spürst den Raum, ohne darin zu ertrinken, und willst Schönheit, ohne dass sie perfekt sein muss. Von den Vieren am leichtesten zu erreichen und am schwersten zu halten.",
+  distorted:"Die Empfindsamkeit ist echt und hat sich gegen dich gewendet. Gestaut fault Wasser zu Scham und Buchführung. Ohne Ufer überschwemmt es. Beides ist dieselbe Gabe ohne Weg.",
+  quiet:"Nicht dein Sitz, und still dabei. Gefühle reißen dich nicht fort, dafür entgeht dir vielleicht, was ein Raum dir sagt. Nichts hiervon drängt.",
+  bleeding:"Fühlen ist nicht dein Boden, und dort blutest du. Was du nicht benennen kannst, bewegt dich trotzdem, und zwar von unten. Sie kämpft nicht um ihren Platz. Sie verhüllt ihr Gesicht und wartet."},
+ saraswati:{n:"Saraswati",el:"Erde",att:"Vollkommenheit",
+  clear:"Handwerk ist verfügbar und der Körper ist bei dir. Du hältst das Detail, ohne dass es dich hält, und im Prozess steckt noch ein Grund. Alles andere, was du tust, lehnt sich daran an.",
+  distorted:"Die Könnerschaft ist echt und zur Prozedur geworden. Du behältst die Form und hast den Grund verloren. Ihre eigene Gabe als Fälschung: rechter Prozess als bloßer Prozess, und der Körper zahlt.",
+  quiet:"Nicht dein Sitz und derzeit keine Bürde. Im Detail wohnst du nicht, aber es klemmt auch nichts. Eher beobachten als behandeln.",
+  bleeding:"Der Boden ist nicht dein Boden. Schwere, Stocken, ein Körper, der zuletzt drankommt. Sie ist die Jüngste und Nächste der Vier, und wo sie fehlt, hat alles andere keinen Ort zu landen."}
+},
+hr:{
+ ishwari:{n:"Ishwari",el:"Zrak",att:"Mudrost",
+  clear:"Prostranstvo je dostupno i nikoga ništa ne košta. Vidiš cjelinu i još uvijek susrećeš ono što ti je pred nosom. Perspektiva bez udaljenosti.",
+  distorted:"Doseg je uistinu tvoj, i upravo se zatvorio oko jedne pozicije. Um koji bi mogao držati cjelinu izabrao je jedan okvir i nazvao ga istinom. Dar i nevolja su ista sposobnost.",
+  quiet:"Nije tvoje sjedište, i trenutno nije problem. Prostranstvo je tu kad ga pozoveš, ali u njemu ne živiš. Ovdje se nema što popravljati.",
+  bleeding:"Nije tvoje tlo, i tu te pogađa. Sigurnost, osuda i analiza stižu sa silinom koja ti ne pripada, jer stižu iz dijela koji nikad nije uvježban."},
+ kali:{n:"Kali",el:"Vatra",att:"Snaga",
+  clear:"Sila je dostupna i usmjerena. Krećeš se kad je kretanje ono što trenutak traži, i pritom nikoga ne spaljuješ. Od četiri je najteže držati je čisto.",
+  distorted:"Intenzitet je stvaran i izgubio je cilj. Sila bez smjera je bijes, sila bez pristanka je nadmoć, sila bez strpljenja je moje ili ništa. Motor je u redu. Upravljač nije.",
+  quiet:"Nije tvoje sjedište i ne muči te. Malo je vjerojatno da ćeš razbiti prepreku, i jednako malo da ćeš razbiti čovjeka. Sri Aurobindo je ionako mislio da je malo tko može nositi.",
+  bleeding:"Sila nije tvoje tlo, pa kad dođe, dođe sirova. Ljutnja koju nisi napisao, vrućina niotkuda, iznenađenje sobom poslije. Neuvježbana vatra ne kuca na vrata."},
+ lakshmi:{n:"Lakshmi",el:"Voda",att:"Sklad",
+  clear:"Sklad je dostupan i ne košta te. Osjećaš prostoriju, a ne utapaš se u njoj, i želiš ljepotu bez potrebe da bude savršena. Od četiri je najlakše dohvatiti je i najteže zadržati.",
+  distorted:"Osjetljivost je stvarna i okrenula se na tebe. Zaustavljena, voda ustaje u sram i vođenje računa. Bez obala, poplavi. Oboje je isti dar bez kuda.",
+  quiet:"Nije tvoje sjedište, i tiho je s tim. Osjećaji te ne odnose, premda ti možda promakne što ti prostorija govori. Ništa ovdje ne gori.",
+  bleeding:"Osjećanje nije tvoje tlo i tu krvariš. Ono što ne možeš imenovati ipak te pokreće, i pokreće te odozdo. Ona se ne bori za svoje mjesto. Zastre lice i čeka."},
+ saraswati:{n:"Saraswati",el:"Zemlja",att:"Savršenstvo",
+  clear:"Zanat je dostupan i tijelo je s tobom. Držiš detalj a da detalj ne drži tebe, i u procesu još stoji razlog. Sve ostalo što radiš naslanja se na ovo.",
+  distorted:"Sposobnost je stvarna i postala je procedura. Zadržao si oblik i izgubio razlog. Njezin vlastiti dar kao krivotvorina: pravi proces krivotvoren u puki proces, a tijelo plaća.",
+  quiet:"Nije tvoje sjedište i trenutno nije teret. U detalju ne živiš, ali ništa se ni ne zaglavljuje. Vrijedi promatrati, ne liječiti.",
+  bleeding:"Tlo nije tvoje tlo. Težina, zastajkivanje, tijelo kojem se posvetiš zadnjem. Ona je najmlađa i najbliža od četiri, i kad nje nema, sve ostalo nema gdje sletjeti."}
+}
+};
+
+/* ── remedies: keyed by the LOADED power, delivering its OPPOSITE ── */
+const RX = {
+en:{
+ ishwari:{opp:"Saraswati",
+  lead:"Your load is in the air, so nothing in the air will shift it. You cannot argue a belief down with a better argument, because argument is the medium the trouble lives in. Go to the opposite. The body does not have opinions.",
+  do:["One physical thing daily that produces a finished object and needs no theory","Food, sleep, breath, in that order, before any insight","Your hands on something real: soil, dough, wood, an instrument","Foot reflexology, massage, acupressure. Somewhere you are handled rather than consulted","Walk before you decide. Decide only while moving"],
+  relief:"Discharging negative beliefs and moving into the highest version of yourself are on your own card and they will help. Treat them as relief, not cure. They are made of the same material as the problem."},
+ kali:{opp:"Lakshmi",
+  lead:"Your load is fire, and fire cannot be reasoned with. Water extinguishes fire, and here that is Lakshmi: the practices that soften rather than aim. This will feel like the wrong direction. That is precisely the sign you have the right one. Fire always wants a bigger fire.",
+  do:["Ho'oponopono. Four sentences, daily, aimed at whoever you burned most recently, starting with yourself","Inner child work, which is where the heat is actually coming from","One forgiveness process carried to the end, not begun and abandoned","Beauty with no purpose. Something lovely that achieves nothing","Ask, before acting: what am I actually trying to do here? If the answer is win, stop"],
+  relief:"Fire ceremony, holotropic breathwork and karmic clearing are on your own card. They give the fire a hearth to burn in, which is real relief. But transcending ego is the actual cure, because ego is what misaims the fire in the first place."},
+ lakshmi:{opp:"Kali",
+  lead:"Your load is water, stagnant or flooding, and more feeling will not move it. Fire is what moves water. A flood needs banks, and banks are built from the thing you have been avoiding.",
+  do:["One boundary said out loud, once, and not renegotiated afterwards","Heat in the body: run, lift, dance until you cannot keep score","Decide something quickly and live with it, on purpose, to prove you can","Fire ceremony. Put the grudge in writing and burn the paper","Notice the moment you are about to say yes out of fear, and say nothing instead"],
+  relief:"Forgiveness processes and inner child work are on your own card and they are yours to keep. But right now they are water working on water. Add fire first, then return to them."},
+ saraswati:{opp:"Ishwari",
+  lead:"Your load is earth, set hard, and more discipline will only pack it tighter. Earth is opened by air. You are not lazy. You are following a rule whose purpose has left the building, and the body has stopped cooperating with a process that no longer means anything.",
+  do:["Ask why, once, about the thing you do most automatically. Accept the answer even if it costs you the habit","Get above the procedure far enough to see whether a reason is still inside it","Stop one thing entirely. Not reduce. Stop. See what actually breaks","Deep inquiry on the rule itself: is it true? Whose rule is it?","Before returning to the work, name what the work is for. If you cannot, that is the finding"],
+  relief:"Healthy habits and energy flow are on your own card and they will ease the body. But they are the very language the trouble is speaking, and adding more of it is how you got here. Get the vision back first, then the habits will hold."}
+},
+de:{
+ ishwari:{opp:"Saraswati",
+  lead:"Deine Last liegt in der Luft, also wird nichts aus der Luft sie bewegen. Du kannst einen Glaubenssatz nicht mit einem besseren Argument niederringen, denn das Argument ist das Medium, in dem die Schwierigkeit lebt. Geh zum Gegenpol. Der Körper hat keine Meinungen.",
+  do:["Täglich eine körperliche Sache, die ein fertiges Ding hervorbringt und keine Theorie braucht","Essen, Schlaf, Atem, in dieser Reihenfolge, vor jeder Einsicht","Deine Hände an etwas Wirklichem: Erde, Teig, Holz, ein Instrument","Fußreflexzonen, Massage, Akupressur. Ein Ort, an dem du behandelt und nicht befragt wirst","Geh, bevor du entscheidest. Entscheide nur in Bewegung"],
+  relief:"Das Entladen negativer Glaubenssätze und der Schritt in die höchste Version deiner selbst stehen auf deiner eigenen Karte und werden helfen. Nimm sie als Linderung, nicht als Heilung. Sie bestehen aus demselben Material wie das Problem."},
+ kali:{opp:"Lakshmi",
+  lead:"Deine Last ist Feuer, und mit Feuer lässt sich nicht reden. Wasser löscht Feuer, und das ist hier Lakshmi: die Praktiken, die weich machen statt zu zielen. Es wird sich nach der falschen Richtung anfühlen. Genau daran erkennst du die richtige. Feuer will immer ein größeres Feuer.",
+  do:["Ho'oponopono. Vier Sätze, täglich, gerichtet an die Person, die du zuletzt verbrannt hast, beginnend mit dir","Arbeit mit dem inneren Kind, denn von dort kommt die Hitze tatsächlich","Ein Vergebungsprozess zu Ende geführt, nicht begonnen und liegen gelassen","Schönheit ohne Zweck. Etwas Schönes, das nichts erreicht","Frage, bevor du handelst: was will ich hier eigentlich tun? Lautet die Antwort gewinnen, halte an"],
+  relief:"Feuerzeremonie, holotropes Atmen und karmische Reinigung stehen auf deiner eigenen Karte. Sie geben dem Feuer eine Feuerstelle, das ist echte Linderung. Doch das Ego zu überschreiten ist die eigentliche Heilung, denn das Ego ist es, was das Feuer falsch richtet."},
+ lakshmi:{opp:"Kali",
+  lead:"Deine Last ist Wasser, gestaut oder überlaufend, und mehr Gefühl wird es nicht bewegen. Feuer ist es, was Wasser bewegt. Eine Flut braucht Ufer, und Ufer baut man aus genau dem, dem du ausgewichen bist.",
+  do:["Eine Grenze, laut gesagt, einmal, und danach nicht neu verhandelt","Hitze im Körper: laufen, heben, tanzen, bis du nicht mehr mitzählen kannst","Etwas schnell entscheiden und damit leben, absichtlich, um dir zu beweisen, dass du es kannst","Feuerzeremonie. Schreib den Groll auf und verbrenne das Papier","Merke den Moment, in dem du aus Angst ja sagen willst, und sage stattdessen nichts"],
+  relief:"Vergebungsprozesse und Arbeit mit dem inneren Kind stehen auf deiner eigenen Karte und gehören dir. Aber gerade jetzt ist das Wasser, das an Wasser arbeitet. Erst Feuer dazu, dann kehre zu ihnen zurück."},
+ saraswati:{opp:"Ishwari",
+  lead:"Deine Last ist Erde, hart geworden, und mehr Disziplin packt sie nur fester. Erde wird von Luft geöffnet. Du bist nicht faul. Du folgst einer Regel, deren Zweck das Haus verlassen hat, und der Körper macht bei einem Prozess nicht mehr mit, der nichts mehr bedeutet.",
+  do:["Frage einmal warum, bei dem, was du am automatischsten tust. Nimm die Antwort an, auch wenn sie dich die Gewohnheit kostet","Komm weit genug über die Prozedur, um zu sehen, ob noch ein Grund darin steckt","Höre mit einer Sache ganz auf. Nicht reduzieren. Aufhören. Sieh, was tatsächlich zerbricht","Tiefe Selbstbefragung an der Regel selbst: stimmt sie? Wessen Regel ist das?","Bevor du zur Arbeit zurückkehrst, benenne, wofür sie da ist. Kannst du es nicht, ist das der Befund"],
+  relief:"Gesunde Gewohnheiten und Energiefluss stehen auf deiner eigenen Karte und werden dem Körper guttun. Aber sie sind genau die Sprache, die die Schwierigkeit spricht, und mehr davon hat dich hierher gebracht. Hol zuerst die Sicht zurück, dann tragen die Gewohnheiten."}
+},
+hr:{
+ ishwari:{opp:"Saraswati",
+  lead:"Tvoj teret je u zraku, pa ga ništa iz zraka neće pomaknuti. Uvjerenje ne možeš oboriti boljim argumentom, jer argument je medij u kojem nevolja živi. Idi na suprotno. Tijelo nema mišljenja.",
+  do:["Jedna tjelesna stvar dnevno koja proizvede gotov predmet i ne treba teoriju","Hrana, san, dah, tim redom, prije svakog uvida","Tvoje ruke na nečem stvarnom: zemlja, tijesto, drvo, instrument","Refleksologija stopala, masaža, akupresura. Negdje gdje te se dotiče, a ne pita","Hodaj prije nego odlučiš. Odlučuj samo u pokretu"],
+  relief:"Pražnjenje negativnih uvjerenja i ulazak u najvišu verziju sebe stoje na tvojoj kartici i pomoći će. Uzmi ih kao olakšanje, ne kao lijek. Od iste su tvari kao i problem."},
+ kali:{opp:"Lakshmi",
+  lead:"Tvoj teret je vatra, a s vatrom se ne pregovara. Voda gasi vatru, a ovdje je to Lakshmi: prakse koje omekšavaju umjesto da ciljaju. Činit će ti se kao pogrešan smjer. Upravo je to znak da je pravi. Vatra uvijek želi veću vatru.",
+  do:["Ho'oponopono. Četiri rečenice, svaki dan, upućene onome koga si zadnjeg spalio, počevši od sebe","Rad s unutarnjim djetetom, jer odande vrućina zapravo dolazi","Jedan proces opraštanja doveden do kraja, ne započet pa ostavljen","Ljepota bez svrhe. Nešto lijepo što ne postiže ništa","Pitaj se prije djelovanja: što ovdje zapravo pokušavam? Ako je odgovor pobijediti, stani"],
+  relief:"Ceremonija vatre, holotropno disanje i karmičko čišćenje stoje na tvojoj kartici. Daju vatri ognjište, i to je pravo olakšanje. No nadilaženje ega je pravi lijek, jer ego je taj koji vatru uopće krivo usmjeri."},
+ lakshmi:{opp:"Kali",
+  lead:"Tvoj teret je voda, ustajala ili razlivena, i više osjećaja neće je pomaknuti. Vatra je ta koja pokreće vodu. Poplavi trebaju obale, a obale se grade od upravo onoga što izbjegavaš.",
+  do:["Jedna granica izgovorena naglas, jednom, i poslije se o njoj ne pregovara","Vrućina u tijelu: trči, diži, pleši dok više ne možeš voditi račun","Odluči nešto brzo i živi s tim, namjerno, da si dokažeš da možeš","Ceremonija vatre. Zapiši zamjeranje i spali papir","Primijeti trenutak kad ćeš pristati iz straha, i umjesto toga ne reci ništa"],
+  relief:"Procesi opraštanja i rad s unutarnjim djetetom stoje na tvojoj kartici i tvoji su. Ali sad su to voda koja radi na vodi. Prvo dodaj vatru, pa im se vrati."},
+ saraswati:{opp:"Ishwari",
+  lead:"Tvoj teret je zemlja, stvrdnuta, i još discipline samo će je jače nabiti. Zemlju otvara zrak. Nisi lijen. Slijediš pravilo čija je svrha napustila zgradu, a tijelo je prestalo surađivati s procesom koji više ništa ne znači.",
+  do:["Pitaj zašto, jednom, za ono što radiš najautomatskije. Prihvati odgovor i ako te stoji navike","Popni se iznad procedure dovoljno da vidiš stoji li još razlog u njoj","Prestani s jednom stvari potpuno. Ne smanji. Prestani. Vidi što se stvarno slomi","Duboko preispitivanje samog pravila: je li istinito? Čije je to pravilo?","Prije nego se vratiš poslu, imenuj čemu služi. Ako ne možeš, to je nalaz"],
+  relief:"Zdrave navike i protok energije stoje na tvojoj kartici i olakšat će tijelu. Ali one su upravo jezik kojim nevolja govori, i više toga te je i dovelo ovamo. Prvo vrati viziju, onda će navike držati."}
+}
+};
+
+/* ═══════════════ engine ═══════════════ */
+let LANG='en', ans={}, cur=0;
+const $ = id => document.getElementById(id);
+const el = (t,c,h)=>{const e=document.createElement(t); if(c)e.className=c; if(h!==undefined)e.innerHTML=h; return e;};
+
+function show(v){
+  document.querySelectorAll('.view').forEach(s=>s.classList.remove('on'));
+  $('v-'+v).classList.add('on');
+  window.scrollTo(0,0);            // instant. never a scroll jump.
+}
+
+function score(){
+  const out={};
+  POWERS.forEach(p=>{
+    const g=d=>{
+      const its=ITEMS.filter(i=>i.p===p.id&&i.d===d);
+      const s=its.reduce((a,i)=>a+(ans[i.k]||0),0);
+      return Math.round(s/(its.length*4)*100);
+    };
+    out[p.id]={nature:g('n'), shadow:g('s')};
+  });
+  return out;
+}
+function stateOf(s){
+  const hiN=s.nature>=50, hiS=s.shadow>=50;
+  return hiN ? (hiS?'distorted':'clear') : (hiS?'bleeding':'quiet');
+}
+function flatline(){
+  const v=Object.values(ans);
+  if(v.length<40) return false;
+  return new Set(v).size<=1;
+}
+function crits(){
+  return ITEMS.filter(i=>i.crit && (ans[i.k]||0)>=4);
+}
+
+/* ── intro ── */
+function vIntro(){
+  const t=T[LANG];
+  $('v-intro').innerHTML='';
+  const w=$('v-intro');
+  w.appendChild(el('p','eyebrow',t.mark));
+  w.appendChild(el('h1','',t.title));
+  w.appendChild(el('p','lede',t.lede));
+  const dl=el('dl','method');
+  t.method.forEach(([h,b])=>{dl.appendChild(el('dt','',h)); dl.appendChild(el('dd','',b));});
+  w.appendChild(dl);
+  w.appendChild(el('p','note',t.introNote));
+  const b=el('div','btns');
+  const go=el('button','btn',t.begin);
+  go.onclick=()=>{cur=0; vQ();};
+  b.appendChild(go); w.appendChild(b);
+}
+
+/* ── question ── */
+function vQ(){
+  const t=T[LANG], it=SEQ[cur], w=$('v-q');
+  w.innerHTML='';
+  const pr=el('div','prog');
+  pr.appendChild(el('span','prog-n',(cur+1)+' / 40'));
+  const bar=el('div','prog-bar'); bar.appendChild(el('i')); 
+  bar.firstChild.style.width=((cur)/40*100)+'%';
+  pr.appendChild(bar);
+  w.appendChild(pr);
+  w.appendChild(el('p','frame', it.d==='n'?t.frameN:t.frameS));
+  w.appendChild(el('p','qtext',Q[LANG][it.k]));
+  const o=el('div','opts');
+  t.scale.forEach((lab,v)=>{
+    const b=el('button','opt');
+    b.setAttribute('role','radio');
+    b.setAttribute('aria-checked', String(ans[it.k]===v));
+    b.appendChild(el('span'));
+    b.appendChild(el('em','',lab)); b.lastChild.style.fontStyle='normal';
+    b.onclick=()=>{ ans[it.k]=v; adv(); };
+    o.appendChild(b);
+  });
+  w.appendChild(o);
+  const nav=el('div','qnav');
+  if(cur>0){
+    const bk=el('button','btn ghost',t.back);
+    bk.onclick=()=>{ cur--; vQ(); };
+    nav.appendChild(bk);
+  }
+  w.appendChild(nav);
+  show('q');
+}
+function adv(){
+  if(cur===19){ vMid(); return; }
+  if(cur===39){ vRes(); return; }
+  cur++; vQ();
+}
+
+/* ── midpoint ── */
+function vMid(){
+  const t=T[LANG], w=$('v-mid'); w.innerHTML='';
+  w.appendChild(el('p','eyebrow',t.mark));
+  w.appendChild(el('h1','',t.midTitle));
+  w.appendChild(el('p','lede',t.midLede));
+  const b=el('div','btns');
+  const go=el('button','btn',t.next);
+  go.onclick=()=>{ cur=20; vQ(); };
+  const bk=el('button','btn ghost',t.back);
+  bk.onclick=()=>{ cur=19; vQ(); };
+  b.appendChild(go); b.appendChild(bk); w.appendChild(b);
+  show('mid');
+}
+
+/* ── results ── */
+function vRes(){
+  const t=T[LANG], s=score(), w=$('v-res'); w.innerHTML='';
+  w.appendChild(el('p','eyebrow',t.mark));
+  w.appendChild(el('h1','',t.resTitle));
+
+  if(flatline()) w.appendChild(el('p','note',t.flat));
+
+  const byNat=[...POWERS].sort((a,b)=>s[b.id].nature-s[a.id].nature);
+  const byShd=[...POWERS].sort((a,b)=>s[b.id].shadow-s[a.id].shadow);
+  const dom=byNat[0], inf=byNat[3], load=byShd[0];
+
+  const v=el('div','verdict');
+  v.appendChild(el('h3','',`${t.dominant} ${P[LANG][dom.id].n}`));
+  v.appendChild(el('p','',`${t.inferior}: ${P[LANG][inf.id].n}. ${t.loaded}: ${P[LANG][load.id].n}.`));
+  const jung = (dom.opp===inf.id);
+  v.appendChild(el('p','',jung?t.axisJung:t.axisOff));
+  v.appendChild(el('p','axis',`<b>${P[LANG][dom.id].n}</b> ${jung?'\u2194':'\u00b7'} <b>${P[LANG][inf.id].n}</b>`));
+  w.appendChild(v);
+
+  POWERS.forEach(p=>{
+    const sc=s[p.id], st=stateOf(sc), d=P[LANG][p.id];
+    const box=el('div','power'); box.style.setProperty('--c',`var(${p.c})`);
+    const top=el('div','p-top');
+    top.appendChild(el('span','p-name',d.n));
+    top.appendChild(el('span','p-el',`${d.el} \u00b7 ${d.att}`));
+    top.appendChild(el('span','p-state',t.states[st]));
+    box.appendChild(top);
+    const bars=el('div','bars');
+    [['nature',t.natureL,''],['shadow',t.shadowL,'sh']].forEach(([k,lab,cls])=>{
+      const b=el('div','bar');
+      b.appendChild(el('b','',lab));
+      const u=el('u',cls); u.appendChild(el('i'));
+      u.firstChild.style.width=sc[k]+'%';
+      b.appendChild(u);
+      b.appendChild(el('em','',sc[k]));
+      bars.appendChild(b);
+    });
+    box.appendChild(bars);
+    box.appendChild(el('p','p-read',d[st]));
+    w.appendChild(box);
+  });
+
+  const b=el('div','btns');
+  const rx=el('button','btn',t.seeRx); rx.onclick=()=>vRx(s,load);
+  const pc=el('button','btn ghost',t.seePrac); pc.onclick=()=>vPrac(s);
+  const ag=el('button','btn ghost',t.again);
+  ag.onclick=()=>{ ans={}; cur=0; vIntro(); show('intro'); };
+  b.appendChild(rx); b.appendChild(pc); b.appendChild(ag);
+  w.appendChild(b);
+  show('res');
+}
+
+/* ── remedy: the opposite, not the same ── */
+function vRx(s,load){
+  const t=T[LANG], w=$('v-rx'); w.innerHTML='';
+  w.appendChild(el('p','eyebrow',t.mark));
+  w.appendChild(el('h1','',t.rxTitle));
+
+  if(s[load.id].shadow<50){
+    w.appendChild(el('p','lede',t.rxBalanced));
+  } else {
+    const r=RX[LANG][load.id], d=P[LANG][load.id];
+    w.appendChild(el('p','lede',t.rxIntro.replace('{P}',d.n)));
+    const box=el('div','rx');
+    box.style.setProperty('--c',`var(${POWERS[PI[load.opp]].c})`);
+    box.appendChild(el('p','rx-h',t.rxOpp));
+    box.appendChild(el('h3','',`${d.n} \u2192 ${r.opp}`));
+    box.appendChild(el('p','',r.lead));
+    const ul=el('ul');
+    r.do.forEach(x=>ul.appendChild(el('li','',x)));
+    box.appendChild(ul);
+    box.appendChild(el('p','relief',`<b style="color:var(--muted);font-weight:600">${t.rxOwn}.</b> ${r.relief}`));
+    const fl=FLOWERS[LANG][load.opp];
+    box.appendChild(el('p','flower',
+      `<b style="color:var(${POWERS[PI[load.opp]].c});font-weight:600">${t.rxFlower}.</b> ${t.rxFlowerLead} <i style="font-style:italic;color:#EDEFF5">${fl.name}</i> <span style="font-family:var(--serif);font-style:italic;color:var(--muted)">(${fl.latin})</span>. ${fl.line}`));
+    w.appendChild(box);
+    w.appendChild(el('p','note',t.rxDefault));
+  }
+
+  const b=el('div','btns');
+  const bk=el('button','btn ghost',t.backRes); bk.onclick=()=>show('res');
+  b.appendChild(bk); w.appendChild(b);
+  show('rx');
+}
+
+/* ── practitioner ── */
+function vPrac(s){
+  const t=T[LANG], w=$('v-prac'); w.innerHTML='';
+  w.appendChild(el('p','eyebrow',t.mark));
+  w.appendChild(el('h1','',t.pracTitle));
+  w.appendChild(el('p','lede',t.pracLede));
+
+  const c=crits();
+  if(!c.length){
+    const ok=el('div','clean');
+    ok.appendChild(el('p','flag-h',t.pracClean.split('.')[0]));
+    ok.appendChild(el('p','',t.pracClean));
+    w.appendChild(ok);
+  } else {
+    w.appendChild(el('p','note',t.pracWhy));
+    c.forEach(i=>{
+      const [h,body]=t.crit[i.crit];
+      const f=el('div','flag');
+      f.appendChild(el('p','flag-h',h));
+      f.appendChild(el('p','',`<q>${Q[LANG][i.k]}</q>`));
+      f.appendChild(el('p','',body));
+      w.appendChild(f);
+    });
+    w.appendChild(el('p','note',t.pracRefer));
+  }
+
+  let raw=t.raw+'\n\n';
+  raw+='POWER        NATURE  LOAD  STATE\n';
+  POWERS.forEach(p=>{
+    const d=P[LANG][p.id], sc=s[p.id];
+    raw+=(d.n+'            ').slice(0,13)
+       + (sc.nature+'      ').slice(0,8)
+       + (sc.shadow+'     ').slice(0,6)
+       + t.states[stateOf(sc)]+'\n';
+  });
+  if(flatline()) raw+='\n!! flatline: identical answers throughout\n';
+  w.appendChild(el('div','raw',raw));
+
+  const b=el('div','btns');
+  const bk=el('button','btn ghost',t.backRes); bk.onclick=()=>show('res');
+  b.appendChild(bk); w.appendChild(b);
+  show('prac');
+}
+
+/* ── language ── */
+function setLang(l){
+  LANG=l;
+  document.documentElement.lang=l;
+  document.title=T[l].mark;
+  $('mark').textContent=T[l].mark;
+  document.getElementById('homelink').textContent=T[l].homelink;
+  document.querySelectorAll('.langs button').forEach(b=>
+    b.setAttribute('aria-current',String(b.dataset.lang===l)));
+  const on=document.querySelector('.view.on').id.slice(2);
+  vIntro();
+  if(on==='q') vQ();
+  else if(on==='mid') vMid();
+  else if(on==='res') vRes();
+  else if(on==='rx'){ const s=score(); const l2=[...POWERS].sort((a,b)=>s[b.id].shadow-s[a.id].shadow)[0]; vRx(s,l2); }
+  else if(on==='prac') vPrac(score());
+  else show('intro');
+}
+document.querySelectorAll('.langs button').forEach(b=>
+  b.addEventListener('click',()=>setLang(b.dataset.lang)));
+
+setLang('en');
+</script>
+</body>
+</html>
