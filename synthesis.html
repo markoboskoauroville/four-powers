@@ -368,7 +368,7 @@ main,.topbar{position:relative;z-index:1}
     <button data-lang="de" aria-current="false">DE</button>
     <button data-lang="hr" aria-current="false">HR</button>
   </nav>
-  <span class="ver">v7 (a)</span>
+  <span class="ver">v8 (a)</span>
 </header>
 
 <main>
@@ -1171,7 +1171,20 @@ function render(lang){
 document.querySelectorAll('.langs button').forEach(b=>
   b.addEventListener('click',()=>render(b.dataset.lang)));
 
-render('en');
+/* ── language persistence (localStorage, no cookie, no banner) ── */
+(function(){
+  var KEY='fp_lang', VALID={en:1,de:1,hr:1};
+  function saved(){
+    try{var v=localStorage.getItem(KEY); return VALID[v]?v:null;}catch(e){return null;}
+  }
+  function save(l){ try{localStorage.setItem(KEY,l);}catch(e){} }
+  var _apply=render;
+  render=function(l){ if(VALID[l]) save(l); return _apply(l); };
+  window.addEventListener('storage',function(e){   // sync open tabs
+    if(e.key===KEY && VALID[e.newValue]) _apply(e.newValue);
+  });
+  render(saved()||'en');
+})();
 
 /* The symbol now lives at the foot of the page, so the bloom waits until
    it is actually on screen. No observer support means show it outright,
