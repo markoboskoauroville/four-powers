@@ -368,7 +368,7 @@ main,.topbar{position:relative;z-index:1}
     <button data-lang="de" aria-current="false">DE</button>
     <button data-lang="hr" aria-current="false">HR</button>
   </nav>
-  <span class="ver">v8 (a)</span>
+  <span class="ver">v9 (a)</span>
 </header>
 
 <main>
@@ -1171,19 +1171,20 @@ function render(lang){
 document.querySelectorAll('.langs button').forEach(b=>
   b.addEventListener('click',()=>render(b.dataset.lang)));
 
-/* ── language persistence (localStorage, no cookie, no banner) ── */
+/* ── language persistence (first-party cookie, no banner needed) ── */
 (function(){
   var KEY='fp_lang', VALID={en:1,de:1,hr:1};
-  function saved(){
-    try{var v=localStorage.getItem(KEY); return VALID[v]?v:null;}catch(e){return null;}
+  function read(){
+    var m=document.cookie.match(/(?:^|; )fp_lang=([^;]*)/);
+    var v=m?decodeURIComponent(m[1]):null; return VALID[v]?v:null;
   }
-  function save(l){ try{localStorage.setItem(KEY,l);}catch(e){} }
+  function write(l){
+    var d=new Date(); d.setTime(d.getTime()+31536000000); // 1 year
+    document.cookie=KEY+'='+l+'; expires='+d.toUTCString()+'; path=/; SameSite=Lax';
+  }
   var _apply=render;
-  render=function(l){ if(VALID[l]) save(l); return _apply(l); };
-  window.addEventListener('storage',function(e){   // sync open tabs
-    if(e.key===KEY && VALID[e.newValue]) _apply(e.newValue);
-  });
-  render(saved()||'en');
+  render=function(l){ if(VALID[l]) write(l); return _apply(l); };
+  render(read()||'en');
 })();
 
 /* The symbol now lives at the foot of the page, so the bloom waits until
