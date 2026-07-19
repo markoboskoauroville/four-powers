@@ -161,7 +161,7 @@ p{color:#C3CAD9;margin-block:.7rem}
     <button data-lang="de" aria-current="false">DE</button>
     <button data-lang="hr" aria-current="false">HR</button>
   </nav>
-  <span class="ver">v4 (a)</span>
+  <span class="ver">v5 (a)</span>
 </header>
 
 <main>
@@ -294,6 +294,7 @@ en:{
   rxDefault:"Sri Aurobindo, asked which aspects to keep in front, named Saraswati and Ishwari, and said that was how he had worked himself. Whatever else you do, keep those two in motion.",
   homelink:"Home",
   rxFlower:"The flower", rxFlowerLead:"Free, and the gentlest of all. The Mother's bloom for the power you are reaching toward:",
+  bookRef:"In the Mother's book of flower significances", bookUrl:"https://motherandsriaurobindo.in/The-Mother/books/misc/the-spiritual-significance-of-flowers/",
 
   pracTitle:"Practitioner notes",
   pracLede:"For the facilitator. The client does not see this screen.",
@@ -350,6 +351,7 @@ de:{
   rxDefault:"Sri Aurobindo nannte, gefragt, welche Aspekte man vorne halten solle, Saraswati und Ishwari, und sagte, so habe er selbst gearbeitet. Was du sonst tust: halte diese beiden in Bewegung.",
   homelink:"Start",
   rxFlower:"Die Blume", rxFlowerLead:"Frei, und die sanfteste von allen. Die Blüte der Mutter für die Kraft, zu der du greifst:",
+  bookRef:"Im Blumenbuch der Mutter", bookUrl:"https://motherandsriaurobindo.in/The-Mother/books/misc/german/the-spiritual-significance-of-flowers/",
 
   pracTitle:"Notizen für die Begleitung",
   pracLede:"Für die begleitende Person. Die Klientin sieht diesen Bildschirm nicht.",
@@ -406,6 +408,7 @@ hr:{
   rxDefault:"Sri Aurobindo je, upitan koje aspekte držati sprijeda, imenovao Saraswati i Ishwari, i rekao da je tako i sam radio. Što god drugo radio, drži to dvoje u pokretu.",
   homelink:"Početak",
   rxFlower:"Cvijet", rxFlowerLead:"Slobodan, i najnježniji od svih. Majčin cvijet za moć kojoj se okrećeš:",
+  bookRef:"U Majčinoj knjizi značenja cvijeća", bookUrl:"https://motherandsriaurobindo.in/The-Mother/books/misc/the-spiritual-significance-of-flowers/",
 
   pracTitle:"Bilješke za voditelja",
   pracLede:"Za osobu koja vodi. Klijent ne vidi ovaj zaslon.",
@@ -889,7 +892,7 @@ function vRx(s,load){
     box.appendChild(el('p','relief',`<b style="color:var(--muted);font-weight:600">${t.rxOwn}.</b> ${r.relief}`));
     const fl=FLOWERS[LANG][load.opp];
     box.appendChild(el('p','flower',
-      `<b style="color:var(${POWERS[PI[load.opp]].c});font-weight:600">${t.rxFlower}.</b> ${t.rxFlowerLead} <i style="font-style:italic;color:#EDEFF5">${fl.name}</i> <span style="font-family:var(--serif);font-style:italic;color:var(--muted)">(${fl.latin})</span>. ${fl.line}`));
+      `<b style="color:var(${POWERS[PI[load.opp]].c});font-weight:600">${t.rxFlower}.</b> ${t.rxFlowerLead} <i style="font-style:italic;color:#EDEFF5">${fl.name}</i> <span style="font-family:var(--serif);font-style:italic;color:var(--muted)">(${fl.latin})</span>. ${fl.line} <a href="${t.bookUrl}" target="_blank" rel="noopener" style="color:var(${POWERS[PI[load.opp]].c});text-decoration:underline;text-underline-offset:2px">${t.bookRef} \u2197</a>`));
     w.appendChild(box);
     w.appendChild(el('p','note',t.rxDefault));
   }
