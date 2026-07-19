@@ -77,7 +77,7 @@ h1{font-family:var(--serif);font-weight:400;font-size:clamp(2rem,7vw,3rem);line-
     <button data-lang="de" aria-current="false">DE</button>
     <button data-lang="hr" aria-current="false">HR</button>
   </nav>
-  <span class="ver">v1 (a)</span>
+  <span class="ver">v2 (a)</span>
 </header>
 <main><div class="wrap" id="wrap"></div></main>
 <script>
@@ -165,7 +165,20 @@ function render(l){
  document.querySelectorAll('.langs button').forEach(b=>b.setAttribute('aria-current',String(b.dataset.lang===l)));
 }
 document.querySelectorAll('.langs button').forEach(b=>b.addEventListener('click',()=>render(b.dataset.lang)));
-render('en');
+/* ── language persistence (localStorage, no cookie, no banner) ── */
+(function(){
+  var KEY='fp_lang', VALID={en:1,de:1,hr:1};
+  function saved(){
+    try{var v=localStorage.getItem(KEY); return VALID[v]?v:null;}catch(e){return null;}
+  }
+  function save(l){ try{localStorage.setItem(KEY,l);}catch(e){} }
+  var _apply=render;
+  render=function(l){ if(VALID[l]) save(l); return _apply(l); };
+  window.addEventListener('storage',function(e){   // sync open tabs
+    if(e.key===KEY && VALID[e.newValue]) _apply(e.newValue);
+  });
+  render(saved()||'en');
+})();
 </script>
 </body>
 </html>
